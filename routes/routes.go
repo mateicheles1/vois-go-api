@@ -25,4 +25,6 @@ func SetupRoutes() {
 	if err := r.Run("localhost:8000"); err != nil {
 		log.Fatal(err)
 	}
+
+	log.Fatal(r.Run("localhist:8000"))
 }
