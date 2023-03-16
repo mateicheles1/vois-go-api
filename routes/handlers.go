@@ -31,6 +31,10 @@ func createList(c *gin.Context) {
 		c.Error(err)
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 	}
+
+	if requestBody.Owner == "" || requestBody.Todos == nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "invalid content"})
+	}
 	
 	for k := range requestBody.Todos {
 		toDosKey := uuid.New().String()
@@ -56,7 +60,9 @@ func updateList(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 	}
 
-
+	if requestBody.Owner == "" {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "invalid owner"})
+	}
 	models.Data[c.Param("listid")].Owner = requestBody.Owner
 	c.IndentedJSON(http.StatusOK, models.Data[c.Param("listid")])
 }
@@ -84,6 +90,10 @@ func updateToDo(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 	}
 
+	if requestBody.Content == "" {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "invalid content"})
+	}
+
 
 	models.Data[c.Param("listid")].Todos[c.Param("todoid")].Content = requestBody.Content
 	c.IndentedJSON(http.StatusOK, models.Data[c.Param("listid")].Todos[c.Param("todoid")])
@@ -95,6 +105,10 @@ func createToDo(c *gin.Context) {
 	if err := c.BindJSON(requestBody); err != nil {
 		c.Error(err)
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+	}
+
+	if requestBody.Content == "" {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "invalid content"})
 	}
 
 	key := uuid.New().String()
