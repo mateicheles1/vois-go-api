@@ -29,6 +29,7 @@ func createList(c *gin.Context) {
 	
 	
 	if err := c.ShouldBindWith(&requestBody, binding.JSON); err != nil {
+		c.Error(err)
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
