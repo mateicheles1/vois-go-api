@@ -1,6 +1,10 @@
 package routes
 
-import "github.com/gin-gonic/gin"
+import (
+	"log"
+
+	"github.com/gin-gonic/gin"
+)
 
 func SetupRoutes() {
 	r := gin.Default()
@@ -18,5 +22,7 @@ func SetupRoutes() {
 	r.PATCH("api/v2/list/:listid/todo/:todoid", updateToDo)
 	r.DELETE("api/v2/list/:listid/todo/:todoid", deleteToDo)
 
-	r.Run("localhost:8000")
+	if err := r.Run("localhost:8000"); err != nil {
+		log.Fatal(err)
+	}
 }

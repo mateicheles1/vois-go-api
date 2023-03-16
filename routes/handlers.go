@@ -107,5 +107,5 @@ func createToDo(c *gin.Context) {
 	requestBody.Listid = c.Param("listid")
 	requestBody.Id = key
 	models.Data[c.Param("listid")].Todos[key] = requestBody
-	c.IndentedJSON(http.StatusOK, models.Data[c.Param("listid")])
+	c.IndentedJSON(http.StatusOK, models.Data[c.Param("listid")].Todos)
 }
