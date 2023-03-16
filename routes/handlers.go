@@ -25,18 +25,20 @@ func createList(c *gin.Context) {
 	mapCopyRequestBody := make(map[string]*models.ToDoList)
 	bodyTodos := make(map[string]*models.ToDo)
 	requestBodyKey := uuid.New().String()
-
+	
 	
 	if err := c.BindJSON(requestBody); err != nil {
 		c.Error(err)
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 	}
-
+	
 	for k := range requestBody.Todos {
+		toDosKey := uuid.New().String()
+		requestBody.Todos[k].Id = toDosKey
 		requestBody.Todos[k].Listid = requestBodyKey
-		bodyTodos[uuid.New().String()] = requestBody.Todos[k]
+		bodyTodos[toDosKey] = requestBody.Todos[k]
 	}
-
+	requestBody.Id = requestBodyKey
 	mapCopyRequestBody[requestBodyKey] = requestBody
 	mapCopyRequestBody[requestBodyKey].Todos = bodyTodos
 
@@ -63,6 +65,7 @@ func deleteList(c *gin.Context) {
 	delete(models.Data, c.Param("listid"))
 	c.IndentedJSON(http.StatusOK, models.Data)
 }
+
 
 func getToDo(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK,models.Data[c.Param("listid")].Todos[c.Param("todoid")])
@@ -96,6 +99,7 @@ func createToDo(c *gin.Context) {
 
 	key := uuid.New().String()
 	requestBody.Listid = c.Param("listid")
+	requestBody.Id = key
 	models.Data[c.Param("listid")].Todos[key] = requestBody
 	c.IndentedJSON(http.StatusOK, models.Data[c.Param("listid")])
 }
