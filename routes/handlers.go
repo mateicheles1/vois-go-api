@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"github.com/google/uuid"
 )
 
@@ -27,21 +28,23 @@ func createList(c *gin.Context) {
 	requestBodyKey := uuid.New().String()
 	
 	
-	if err := c.BindJSON(requestBody); err != nil {
-		c.Error(err)
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+	if err := c.ShouldBindWith(&requestBody, binding.JSON); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
 	}
 
-	if requestBody.Owner == "" || requestBody.Todos == nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "invalid content"})
+	if requestBody.Todos == nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "todos can't be empty"})
+		return
 	}
-	
+
 	for k := range requestBody.Todos {
 		toDosKey := uuid.New().String()
 		requestBody.Todos[k].Id = toDosKey
 		requestBody.Todos[k].Listid = requestBodyKey
 		bodyTodos[toDosKey] = requestBody.Todos[k]
 	}
+
 	requestBody.Id = requestBodyKey
 	mapCopyRequestBody[requestBodyKey] = requestBody
 	mapCopyRequestBody[requestBodyKey].Todos = bodyTodos
@@ -55,14 +58,11 @@ func createList(c *gin.Context) {
 func updateList(c *gin.Context) {
 	requestBody := new(models.ToDoList)
 
-	if err := c.BindJSON(requestBody); err != nil {
-		c.Error(err)
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+	if err := c.ShouldBindWith(&requestBody, binding.JSON); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
 	}
 
-	if requestBody.Owner == "" {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "invalid owner"})
-	}
 	models.Data[c.Param("listid")].Owner = requestBody.Owner
 	c.IndentedJSON(http.StatusOK, models.Data[c.Param("listid")])
 }
@@ -85,13 +85,9 @@ func deleteToDo(c *gin.Context) {
 func updateToDo(c *gin.Context) {
 	requestBody := new(models.ToDo)
 
-	if err := c.BindJSON(requestBody); err != nil {
-		c.Error(err)
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-	}
-
-	if requestBody.Content == "" {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "invalid content"})
+		if err := c.ShouldBindWith(&requestBody, binding.JSON); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
 	}
 
 
@@ -102,13 +98,9 @@ func updateToDo(c *gin.Context) {
 func createToDo(c *gin.Context) {
 	requestBody := new(models.ToDo)
 
-	if err := c.BindJSON(requestBody); err != nil {
-		c.Error(err)
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-	}
-
-	if requestBody.Content == "" {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "invalid content"})
+	if err := c.ShouldBindWith(&requestBody, binding.JSON); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
 	}
 
 	key := uuid.New().String()
