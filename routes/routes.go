@@ -22,9 +22,5 @@ func SetupRoutes() {
 	r.PATCH("api/v2/list/:listid/todo/:todoid", updateToDo)
 	r.DELETE("api/v2/list/:listid/todo/:todoid", deleteToDo)
 
-	if err := r.Run("localhost:8000"); err != nil {
-		log.Fatal(err)
-	}
-
 	log.Fatal(r.Run("localhist:8000"))
 }
