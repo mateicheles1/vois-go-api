@@ -27,7 +27,7 @@ func createList(c *gin.Context) {
 	// un map de todo-uri care va primi pe key todo struct-ul din todolist struct-ul requestBody
 	requestBodyTodos := make(map[string]*models.ToDo)
 	// key din models.Data si id-ul struct-ului de todolist
-	requestBodyKey := uuid.New().String()
+	toDoListKey := uuid.New().String()
 	
 	
 	if err := c.ShouldBindWith(&requestBody, binding.JSON); err != nil {
@@ -43,14 +43,14 @@ func createList(c *gin.Context) {
 	for k := range requestBody.Todos {
 		toDosKey := uuid.New().String()
 		requestBody.Todos[k].Id = toDosKey
-		requestBody.Todos[k].Listid = requestBodyKey
+		requestBody.Todos[k].Listid = toDoListKey
 		// map-ul map[toDosKey]*ToDo primeste struct-urile de todo-uri din request body
 		requestBodyTodos[toDosKey] = requestBody.Todos[k]
 	}
 
-	requestBody.Id = requestBodyKey
-	models.Data[requestBodyKey] = requestBody
-	models.Data[requestBodyKey].Todos = requestBodyTodos
+	requestBody.Id = toDoListKey
+	models.Data[toDoListKey] = requestBody
+	models.Data[toDoListKey].Todos = requestBodyTodos
 	c.IndentedJSON(http.StatusOK, models.Data)
 
 }
