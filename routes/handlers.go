@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"gogin-api/logs"
 	"gogin-api/models"
 	"net/http"
 
@@ -8,6 +9,9 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	"github.com/google/uuid"
 )
+
+
+
 
 func lists(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, models.Data)
@@ -22,6 +26,7 @@ func getList(c *gin.Context) {
 }
 
 func createList(c *gin.Context) {
+	logger := logs.Logger()
 	// request body 
 	requestBody := new(models.ToDoList)
 	// un map de todo-uri care va primi pe key todo struct-ul din todolist struct-ul requestBody
@@ -31,12 +36,19 @@ func createList(c *gin.Context) {
 	
 	
 	if err := c.ShouldBindWith(&requestBody, binding.JSON); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		logger.Error().
+		Str("Method", c.Request.Method).
+		Str("Path", c.Request.URL.Path).
+		Int("Status code", http.StatusBadRequest).
+        Stack().
+        Err(err).
+        Msg("Couldn't unmarshal the request body into the requestBody struct")
 		return
 	}
 
 	if requestBody.Todos == nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "todos can't be empty"})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "todos can't be empty"})
 		return
 	}
 
@@ -58,9 +70,17 @@ func createList(c *gin.Context) {
 
 func updateList(c *gin.Context) {
 	requestBody := new(models.ToDoList)
+	logger := logs.Logger()
 
 	if err := c.ShouldBindWith(&requestBody, binding.JSON); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		logger.Error().
+		Str("Method", c.Request.Method).
+		Str("Path", c.Request.URL.Path).
+		Int("Status code", http.StatusBadRequest).
+        Stack().
+        Err(err).
+        Msg("Couldn't unmarshal the request body into the requestBody struct")
 		return
 	}
 
@@ -85,9 +105,17 @@ func deleteToDo(c *gin.Context) {
 
 func updateToDo(c *gin.Context) {
 	requestBody := new(models.ToDo)
+	logger := logs.Logger()
 
 		if err := c.ShouldBindWith(&requestBody, binding.JSON); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		logger.Error().
+		Str("Method", c.Request.Method).
+		Str("Path", c.Request.URL.Path).
+		Int("Status code", http.StatusBadRequest).
+        Stack().
+        Err(err).
+        Msg("Couldn't unmarshal the request body into the requestBody struct")
 		return
 	}
 
@@ -98,9 +126,17 @@ func updateToDo(c *gin.Context) {
 
 func createToDo(c *gin.Context) {
 	requestBody := new(models.ToDo)
+	logger := logs.Logger()
 
 	if err := c.ShouldBindWith(&requestBody, binding.JSON); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		logger.Error().
+		Str("Method", c.Request.Method).
+		Str("Path", c.Request.URL.Path).
+		Int("Status code", http.StatusBadRequest).
+        Stack().
+        Err(err).
+        Msg("Couldn't unmarshal the request body into the requestBody struct")
 		return
 	}
 

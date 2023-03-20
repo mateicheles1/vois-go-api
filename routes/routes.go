@@ -1,10 +1,11 @@
 package routes
 
 import (
-	"log"
+	"gogin-api/logs"
 
 	"github.com/gin-gonic/gin"
 )
+
 
 func SetupRoutes() {
 	r := gin.Default()
@@ -22,5 +23,11 @@ func SetupRoutes() {
 	r.PATCH("api/v2/list/:listid/todo/:todoid", updateToDo)
 	r.DELETE("api/v2/list/:listid/todo/:todoid", deleteToDo)
 
-	log.Fatal(r.Run("localhost:8000"))
+	if err := r.Run("localhost:8080"); err != nil {
+		logger := logs.Logger()
+		logger.Fatal().
+        Stack().
+        Err(err).
+        Msg("couldn't listen and serve")
+	}
 }
