@@ -11,7 +11,7 @@ import (
 func Logger() zerolog.Logger {
 	logFile, err := os.OpenFile(
         "./logs/log-file.log",
-        os.O_APPEND|os.O_CREATE|os.O_WRONLY,
+        os.O_RDWR|os.O_CREATE|os.O_APPEND,
         0664,
     )
 	if err != nil {
