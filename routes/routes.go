@@ -24,5 +24,6 @@ func SetupRoutes() {
 
 	if err := r.Run("localhost:8080"); err != nil {
 		log.Panic().Msgf("couldn't start server: %s", err)
-}
+	}
+	log.Info().Msg("server started")
 }

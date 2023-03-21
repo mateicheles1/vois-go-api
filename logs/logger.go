@@ -16,7 +16,7 @@ func Logger() zerolog.Logger {
         0664,
     )
 	if err != nil {
-		log.Panic().Err(err)
+		log.Panic().Msgf("couldn't open file; %s", err)
 	}
 
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
