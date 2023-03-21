@@ -14,13 +14,11 @@ import (
 var logger = logs.Logger()
 
 func check(err error, c *gin.Context) {
-	logger.Error().
+	logger.Panic().
 		Str("Method", c.Request.Method).
 		Str("Path", c.Request.URL.Path).
 		Int("Status code", http.StatusBadRequest).
-        Stack().
-        Err(err).
-        Msg("Couldn't unmarshal the request body into the requestBody struct")
+        Msgf("Couldn't unmarshal the request body into the requestBody struct due to: %s", err)
 }
 
 func lists(c *gin.Context) {
@@ -47,7 +45,6 @@ func createList(c *gin.Context) {
 	if err := c.ShouldBindWith(&requestBody, binding.JSON); err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		check(err, c)
-		return
 	}
 
 	logger.Info().
@@ -88,7 +85,6 @@ func updateList(c *gin.Context) {
 	if err := c.ShouldBindWith(&requestBody, binding.JSON); err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		check(err, c)
-		return
 	}
 
 	logger.Info().
@@ -139,7 +135,6 @@ func updateToDo(c *gin.Context) {
 		if err := c.ShouldBindWith(&requestBody, binding.JSON); err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		check(err, c)
-		return
 	}
 
 	logger.Info().
@@ -163,7 +158,6 @@ func createToDo(c *gin.Context) {
 	if err := c.ShouldBindWith(&requestBody, binding.JSON); err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		check(err, c)
-		return
 	}
 
 	logger.Info().

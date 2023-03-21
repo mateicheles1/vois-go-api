@@ -5,7 +5,6 @@ import (
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"github.com/rs/zerolog/pkgerrors"
 )
 
 func Logger() zerolog.Logger {
@@ -19,8 +18,6 @@ func Logger() zerolog.Logger {
 		log.Panic().Msgf("couldn't open file; %s", err)
 	}
 
-	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
-	zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
 	logger := zerolog.New(logFile).With().Timestamp().Caller().Logger()
 	return logger
 }
