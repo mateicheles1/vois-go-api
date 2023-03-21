@@ -46,15 +46,15 @@ func createList(c *gin.Context) {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		check(err, c)
 	}
-
-	logger.Info().
-	Str("path", c.Request.URL.Path).
-	Msg("request body successfully parsed")
-
+	
 	if requestBody.Todos == nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "todos can't be empty"})
 		return
 	}
+	
+	logger.Info().
+	Str("path", c.Request.URL.Path).
+	Msg("request body successfully parsed")
 
 	for k := range requestBody.Todos {
 		toDosKey := uuid.New().String()
