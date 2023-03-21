@@ -13,6 +13,16 @@ import (
 
 var logger = logs.Logger()
 
+func check(err error, c *gin.Context) {
+	logger.Error().
+		Str("Method", c.Request.Method).
+		Str("Path", c.Request.URL.Path).
+		Int("Status code", http.StatusBadRequest).
+        Stack().
+        Err(err).
+        Msg("Couldn't unmarshal the request body into the requestBody struct")
+}
+
 func lists(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, models.Data)
 }
@@ -36,15 +46,13 @@ func createList(c *gin.Context) {
 	
 	if err := c.ShouldBindWith(&requestBody, binding.JSON); err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
-		logger.Error().
-		Str("Method", c.Request.Method).
-		Str("Path", c.Request.URL.Path).
-		Int("Status code", http.StatusBadRequest).
-        Stack().
-        Err(err).
-        Msg("Couldn't unmarshal the request body into the requestBody struct")
+		check(err, c)
 		return
 	}
+
+	logger.Info().
+	Str("path", c.Request.URL.Path).
+	Msg("request body successfully parsed")
 
 	if requestBody.Todos == nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "todos can't be empty"})
@@ -62,6 +70,13 @@ func createList(c *gin.Context) {
 	requestBody.Id = toDoListKey
 	models.Data[toDoListKey] = requestBody
 	models.Data[toDoListKey].Todos = requestBodyTodos
+	
+	logger.Info().
+	Str("method", c.Request.Method).
+	Int("status code", http.StatusOK).
+	Str("path", c.Request.URL.Path).
+	Msg("list successfully created")
+
 	c.IndentedJSON(http.StatusOK, models.Data)
 
 }
@@ -72,22 +87,33 @@ func updateList(c *gin.Context) {
 
 	if err := c.ShouldBindWith(&requestBody, binding.JSON); err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
-		logger.Error().
-		Str("Method", c.Request.Method).
-		Str("Path", c.Request.URL.Path).
-		Int("Status code", http.StatusBadRequest).
-        Stack().
-        Err(err).
-        Msg("Couldn't unmarshal the request body into the requestBody struct")
+		check(err, c)
 		return
 	}
 
+	logger.Info().
+	Str("path", c.Request.URL.Path).
+	Msg("request body successfully parsed")
+
 	models.Data[c.Param("listid")].Owner = requestBody.Owner
+
+	logger.Info().
+	Str("method", c.Request.Method).
+	Int("status code", http.StatusOK).
+	Msg("list successfully updated")
+
 	c.IndentedJSON(http.StatusOK, models.Data[c.Param("listid")])
 }
 
 func deleteList(c *gin.Context) {
 	delete(models.Data, c.Param("listid"))
+
+	logger.Info().
+	Str("method", c.Request.Method).
+	Int("status code", http.StatusOK).
+	Str("path", c.Request.URL.Path).
+	Msg("list successfully deleted")
+
 	c.IndentedJSON(http.StatusOK, models.Data)
 }
 
@@ -98,6 +124,12 @@ func getToDo(c *gin.Context) {
 
 func deleteToDo(c *gin.Context) {
 	delete(models.Data[c.Param("listid")].Todos, c.Param("todoid"))
+
+	logger.Info().
+	Str("method", c.Request.Method).
+	Int("status code", http.StatusOK).
+	Msg("todo successfully deleted")
+
 	c.IndentedJSON(http.StatusOK, models.Data[c.Param("listid")].Todos)
 }
 
@@ -106,18 +138,22 @@ func updateToDo(c *gin.Context) {
 
 		if err := c.ShouldBindWith(&requestBody, binding.JSON); err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
-		logger.Error().
-		Str("Method", c.Request.Method).
-		Str("Path", c.Request.URL.Path).
-		Int("Status code", http.StatusBadRequest).
-        Stack().
-        Err(err).
-        Msg("Couldn't unmarshal the request body into the requestBody struct")
+		check(err, c)
 		return
 	}
 
+	logger.Info().
+	Str("path", c.Request.URL.Path).
+	Msg("request body successfully parsed")
+
 
 	models.Data[c.Param("listid")].Todos[c.Param("todoid")].Content = requestBody.Content
+
+	logger.Info().
+	Str("method", c.Request.Method).
+	Int("status code", http.StatusOK).
+	Msg("todo successfully updated")
+
 	c.IndentedJSON(http.StatusOK, models.Data[c.Param("listid")].Todos[c.Param("todoid")])
 }
 
@@ -126,19 +162,23 @@ func createToDo(c *gin.Context) {
 
 	if err := c.ShouldBindWith(&requestBody, binding.JSON); err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
-		logger.Error().
-		Str("Method", c.Request.Method).
-		Str("Path", c.Request.URL.Path).
-		Int("Status code", http.StatusBadRequest).
-        Stack().
-        Err(err).
-        Msg("Couldn't unmarshal the request body into the requestBody struct")
+		check(err, c)
 		return
 	}
+
+	logger.Info().
+	Str("path", c.Request.URL.Path).
+	Msg("request body successfully parsed")
 
 	key := uuid.New().String()
 	requestBody.Listid = c.Param("listid")
 	requestBody.Id = key
 	models.Data[c.Param("listid")].Todos[key] = requestBody
+
+	logger.Info().
+	Str("method", c.Request.Method).
+	Int("status code", http.StatusOK).
+	Msg("todo successfully created")
+
 	c.IndentedJSON(http.StatusOK, models.Data[c.Param("listid")].Todos[key])
 }

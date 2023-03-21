@@ -15,13 +15,10 @@ func Logger() zerolog.Logger {
         os.O_RDWR|os.O_CREATE|os.O_APPEND,
         0664,
     )
-
 	if err != nil {
-		log.Fatal().
-		Err(err).
-		Msg("Couldn't open file")
+		log.Panic().Err(err)
 	}
-	
+
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 	zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
 	logger := zerolog.New(logFile).With().Timestamp().Caller().Logger()
