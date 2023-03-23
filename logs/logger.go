@@ -7,7 +7,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func Logger() zerolog.Logger {
+func CustomLogger() zerolog.Logger {
 
 	logFile, err := os.OpenFile(
         "./logs/log-file.log",
@@ -15,9 +15,12 @@ func Logger() zerolog.Logger {
         0664,
     )
 	if err != nil {
-		log.Panic().Msgf("couldn't open file; %s", err)
+		log.Panic().Msgf("Could not open file due to: %s", err)
 	}
 
 	logger := zerolog.New(logFile).With().Timestamp().Caller().Logger()
 	return logger
 }
+
+var Logger = CustomLogger()
+ 
