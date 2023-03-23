@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gin-gonic/gin/binding"
 	"github.com/google/uuid"
 )
 
@@ -42,7 +41,7 @@ func createList(c *gin.Context) {
 	toDoListKey := uuid.New().String()
 	
 	
-	if err := c.ShouldBindWith(&requestBody, binding.JSON); err != nil {
+	if err := c.ShouldBindJSON(&requestBody); err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		check(err, c)
 	}
@@ -52,9 +51,6 @@ func createList(c *gin.Context) {
 		return
 	}
 	
-	logger.Info().
-	Str("path", c.Request.URL.Path).
-	Msg("request body successfully parsed")
 
 	for k := range requestBody.Todos {
 		toDosKey := uuid.New().String()
@@ -82,14 +78,10 @@ func createList(c *gin.Context) {
 func updateList(c *gin.Context) {
 	requestBody := new(models.ToDoList)
 
-	if err := c.ShouldBindWith(&requestBody, binding.JSON); err != nil {
+	if err := c.ShouldBindJSON(&requestBody); err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		check(err, c)
 	}
-
-	logger.Info().
-	Str("path", c.Request.URL.Path).
-	Msg("request body successfully parsed")
 
 	models.Data[c.Param("listid")].Owner = requestBody.Owner
 
@@ -132,14 +124,10 @@ func deleteToDo(c *gin.Context) {
 func updateToDo(c *gin.Context) {
 	requestBody := new(models.ToDo)
 
-		if err := c.ShouldBindWith(&requestBody, binding.JSON); err != nil {
+		if err := c.ShouldBindJSON(&requestBody); err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		check(err, c)
 	}
-
-	logger.Info().
-	Str("path", c.Request.URL.Path).
-	Msg("request body successfully parsed")
 
 
 	models.Data[c.Param("listid")].Todos[c.Param("todoid")].Content = requestBody.Content
@@ -155,14 +143,10 @@ func updateToDo(c *gin.Context) {
 func createToDo(c *gin.Context) {
 	requestBody := new(models.ToDo)
 
-	if err := c.ShouldBindWith(&requestBody, binding.JSON); err != nil {
+	if err := c.ShouldBindJSON(&requestBody); err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		check(err, c)
 	}
-
-	logger.Info().
-	Str("path", c.Request.URL.Path).
-	Msg("request body successfully parsed")
 
 	key := uuid.New().String()
 	requestBody.Listid = c.Param("listid")
