@@ -23,7 +23,6 @@ func SetupRoutes() {
 	r.DELETE("api/v2/list/:listid/todo/:todoid", deleteToDo)
 
 	if err := r.Run("localhost:8080"); err != nil {
-		log.Panic().Msgf("couldn't start server: %s", err)
+		log.Fatal().Msgf("couldn't start server: %s", err)
 	}
-	log.Info().Msg("server started")
 }
