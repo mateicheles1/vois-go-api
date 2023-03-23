@@ -1,8 +1,9 @@
 package routes
 
 import (
+	"gogin-api/logs"
+
 	"github.com/gin-gonic/gin"
-	"github.com/rs/zerolog/log"
 )
 
 
@@ -23,6 +24,6 @@ func SetupRoutes() {
 	r.DELETE("api/v2/list/:listid/todo/:todoid", deleteToDo)
 
 	if err := r.Run(":8080"); err != nil {
-		log.Logger.Fatal().Msgf("could not start server due to: %s", err)
+		logs.Logger.Fatal().Msgf("could not start server due to: %s", err)
 	}
 }
