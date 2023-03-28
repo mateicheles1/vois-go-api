@@ -9,15 +9,15 @@ import (
 )
 
 func lists(c *gin.Context) {
-	c.IndentedJSON(http.StatusOK, models.Data)
+	c.IndentedJSON(http.StatusOK, gin.H{"data": models.Data})
 }
 
 func todos(c *gin.Context) {
-	c.IndentedJSON(http.StatusOK, models.Data[c.Param("listid")].Todos)
+	c.IndentedJSON(http.StatusOK, gin.H{"data": models.Data[c.Param("listid")].Todos})
 }
 
 func getList(c *gin.Context) {
-	c.IndentedJSON(http.StatusOK, models.Data[c.Param("listid")])
+	c.IndentedJSON(http.StatusOK, gin.H{"data": models.Data[c.Param("listid")]})
 }
 
 func createList(c *gin.Context) {
