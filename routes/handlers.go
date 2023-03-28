@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"gogin-api/logs"
 	"gogin-api/models"
 	"net/http"
 
@@ -53,11 +52,6 @@ func createList(c *gin.Context) {
 	models.Data[toDoListKey] = requestBody
 	models.Data[toDoListKey].Todos = requestBodyTodos
 	
-	logs.Logger.Info().
-	Str("method", c.Request.Method).
-	Int("status code", http.StatusOK).
-	Str("path", c.Request.URL.Path).
-	Msg("list successfully created")
 
 	c.IndentedJSON(http.StatusOK, models.Data)
 
@@ -74,10 +68,6 @@ func updateList(c *gin.Context) {
 
 	models.Data[c.Param("listid")].Owner = requestBody.Owner
 
-	logs.Logger.Info().
-	Str("method", c.Request.Method).
-	Int("status code", http.StatusOK).
-	Msg("list successfully updated")
 
 	c.IndentedJSON(http.StatusOK, models.Data[c.Param("listid")])
 }
@@ -85,11 +75,6 @@ func updateList(c *gin.Context) {
 func deleteList(c *gin.Context) {
 	delete(models.Data, c.Param("listid"))
 
-	logs.Logger.Info().
-	Str("method", c.Request.Method).
-	Int("status code", http.StatusOK).
-	Str("path", c.Request.URL.Path).
-	Msg("list successfully deleted")
 
 	c.IndentedJSON(http.StatusOK, models.Data)
 }
@@ -101,11 +86,6 @@ func getToDo(c *gin.Context) {
 
 func deleteToDo(c *gin.Context) {
 	delete(models.Data[c.Param("listid")].Todos, c.Param("todoid"))
-
-	logs.Logger.Info().
-	Str("method", c.Request.Method).
-	Int("status code", http.StatusOK).
-	Msg("todo successfully deleted")
 
 	c.IndentedJSON(http.StatusOK, models.Data[c.Param("listid")].Todos)
 }
@@ -121,10 +101,6 @@ func updateToDo(c *gin.Context) {
 
 	models.Data[c.Param("listid")].Todos[c.Param("todoid")].Content = requestBody.Content
 
-	logs.Logger.Info().
-	Str("method", c.Request.Method).
-	Int("status code", http.StatusOK).
-	Msg("todo successfully updated")
 
 	c.IndentedJSON(http.StatusOK, models.Data[c.Param("listid")].Todos[c.Param("todoid")])
 }
@@ -142,10 +118,6 @@ func createToDo(c *gin.Context) {
 	requestBody.Id = key
 	models.Data[c.Param("listid")].Todos[key] = requestBody
 
-	logs.Logger.Info().
-	Str("method", c.Request.Method).
-	Int("status code", http.StatusOK).
-	Msg("todo successfully created")
 
 	c.IndentedJSON(http.StatusOK, models.Data[c.Param("listid")].Todos[key])
 }
