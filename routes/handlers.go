@@ -47,7 +47,7 @@ func createList(c *gin.Context) {
 		// map-ul map[toDosKey]*ToDo primeste struct-urile de todo-uri din request body
 		requestBodyTodos[toDosKey] = requestBody.Todos[k]
 	}
-
+	
 	requestBody.Id = toDoListKey
 	models.Data[toDoListKey] = requestBody
 	models.Data[toDoListKey].Todos = requestBodyTodos
