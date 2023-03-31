@@ -63,7 +63,7 @@ func createList(c *gin.Context) {
 	models.Data[todoListKey].Owner = requestBody.Owner
 	models.Data[todoListKey].Todos = requestBodyTodos
 
-	c.IndentedJSON(http.StatusOK, models.Data[todoListKey])
+	c.IndentedJSON(http.StatusCreated, models.Data[todoListKey])
 }
 
 func updateList(c *gin.Context) {
