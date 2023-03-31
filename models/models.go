@@ -12,7 +12,7 @@ type ToDoList struct {
 }
 
 type RequestBodyList struct {
-	Owner string   `json:"owner" binding:"required"`
+	Owner string   `json:"owner"`
 	Todos []string `json:"todos" binding:"required"`
 }
 

@@ -45,11 +45,6 @@ func createList(c *gin.Context) {
 		check(err, c)
 	}
 
-	if len(requestBody.Todos) == 0 {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "todos can't be empty"})
-		return
-	}
-
 	for _, v := range requestBody.Todos {
 		toDosKey := uuid.New().String()
 		requestBodyTodos[toDosKey] = new(models.ToDo)
