@@ -36,42 +36,35 @@ func getList(c *gin.Context) {
 }
 
 func createList(c *gin.Context) {
-	// request body 
-	requestBody := new(models.ToDoList)
-	// un map de todo-uri care va primi pe key todo struct-ul din todolist struct-ul requestBody
+	requestBody := new(models.RequestBodyList)
 	requestBodyTodos := make(map[string]*models.ToDo)
-	// key din models.Data si id-ul struct-ului de todolist
-	toDoListKey := uuid.New().String()
-	
-	
+	todoListKey := uuid.New().String()
+
 	if err := c.ShouldBindJSON(requestBody); err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		check(err, c)
 	}
-	
-	if requestBody.Todos == nil {
+
+	if len(requestBody.Todos) == 0 {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "todos can't be empty"})
 		return
 	}
-	
 
-	for k := range requestBody.Todos {
+	for _, v := range requestBody.Todos {
 		toDosKey := uuid.New().String()
-		requestBody.Todos[k].Id = toDosKey
-		requestBody.Todos[k].Listid = toDoListKey
-		// map-ul map[toDosKey]*ToDo primeste struct-urile de todo-uri din request body
-		requestBodyTodos[toDosKey] = requestBody.Todos[k]
+		toDo := new(models.ToDo)
+		toDo.Content = v
+		toDo.Id = toDosKey
+		requestBodyTodos[toDosKey] = toDo
 	}
-	
-	requestBody.Id = toDoListKey
-	models.Data[toDoListKey] = requestBody
-	models.Data[toDoListKey].Todos = requestBodyTodos
-	
- 
-	c.IndentedJSON(http.StatusOK, models.Data[toDoListKey])
 
+	models.Data[todoListKey] = new(models.ToDoList)
+	models.Data[todoListKey].Id = todoListKey
+	models.Data[todoListKey].Owner = requestBody.Owner
+	models.Data[todoListKey].Todos = requestBodyTodos
+
+	c.IndentedJSON(http.StatusOK, models.Data[todoListKey])
 }
-
 
 func updateList(c *gin.Context) {
 
@@ -121,7 +114,6 @@ func getToDo(c *gin.Context) {
 			_, hasTodo := models.Data[c.Param("listid")].Todos[c.Param("todoid")]
 			if !hasTodo {
 				c.IndentedJSON(http.StatusNotFound, gin.H{"message": "todo not found"})
-				return
 			} else {
 				c.IndentedJSON(http.StatusOK, models.Data[c.Param("listid")].Todos[c.Param("todoid")])
 			}
@@ -195,7 +187,6 @@ func createToDo(c *gin.Context) {
 	}
 
 	key := uuid.New().String()
-	requestBody.Listid = c.Param("listid")
 	requestBody.Id = key
 	models.Data[c.Param("listid")].Todos[key] = requestBody
 
