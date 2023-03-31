@@ -15,7 +15,7 @@ func CustomLogger() zerolog.Logger {
         0664,
     )
 	if err != nil {
-		log.Panic().Msgf("Could not open file due to: %s", err)
+		log.Panic().Msgf("Could not open file due to: %s", err.Error())
 	}
 
 	logger := zerolog.New(logFile).With().Timestamp().Caller().Logger()

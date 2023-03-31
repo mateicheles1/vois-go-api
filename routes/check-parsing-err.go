@@ -13,5 +13,5 @@ func check(err error, c *gin.Context) {
 		Str("Method", c.Request.Method).
 		Str("Path", c.Request.URL.Path).
 		Int("Status code", http.StatusBadRequest).
-		Msgf("Could not unmarshal the request body into the requestBody struct due to: %s", err)
+		Msgf("Could not unmarshal the request body into the requestBody struct due to: %s", err.Error())
 }
