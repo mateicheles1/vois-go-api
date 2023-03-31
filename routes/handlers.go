@@ -52,7 +52,7 @@ func createList(c *gin.Context) {
 	models.Data[toDoListKey] = requestBody
 	models.Data[toDoListKey].Todos = requestBodyTodos
 	
-
+ 
 	c.IndentedJSON(http.StatusOK, gin.H{"message": "list successfully created", "data": models.Data[toDoListKey]})
 
 }
@@ -68,9 +68,9 @@ func updateList(c *gin.Context) {
 
 	models.Data[c.Param("listid")].Owner = requestBody.Owner
 
-
 	c.IndentedJSON(http.StatusOK, gin.H{"message": "list successfully updated", "data": models.Data[c.Param("listid")]})
 }
+
 
 func deleteList(c *gin.Context) {
 	delete(models.Data, c.Param("listid"))
@@ -81,13 +81,43 @@ func deleteList(c *gin.Context) {
 
 
 func getToDo(c *gin.Context) {
-	c.IndentedJSON(http.StatusOK, gin.H{"data": models.Data[c.Param("listid")].Todos[c.Param("todoid")]})
+	_, hasList := models.Data[c.Param("listid")]
+
+
+		if !hasList {
+			c.IndentedJSON(http.StatusNotFound, gin.H{"message": "list not found"})
+		}
+
+		if hasList {
+			_, hasTodo := models.Data[c.Param("listid")].Todos[c.Param("todoid")]
+			if !hasTodo {
+				c.IndentedJSON(http.StatusNotFound, gin.H{"message": "todo not found"})
+			} else {
+				c.IndentedJSON(http.StatusOK, models.Data[c.Param("listid")].Todos[c.Param("todoid")])
+			}
+		}
+
 }
 
-func deleteToDo(c *gin.Context) {
-	delete(models.Data[c.Param("listid")].Todos, c.Param("todoid"))
 
-	c.IndentedJSON(http.StatusOK, gin.H{"message": "todo successfully deleted"})
+func deleteToDo(c *gin.Context) {
+	
+	_, hasList := models.Data[c.Param("listid")]
+
+
+		if !hasList {
+			c.IndentedJSON(http.StatusNotFound, gin.H{"message": "list not found"})
+		}
+
+		if hasList {
+			_, hasTodo := models.Data[c.Param("listid")].Todos[c.Param("todoid")]
+			if !hasTodo {
+				c.IndentedJSON(http.StatusNotFound, gin.H{"message": "todo not found"})
+			} else {
+				delete(models.Data[c.Param("listid")].Todos, c.Param("todoid"))
+			}
+		}
+
 }
 
 func updateToDo(c *gin.Context) {
@@ -102,7 +132,7 @@ func updateToDo(c *gin.Context) {
 	models.Data[c.Param("listid")].Todos[c.Param("todoid")].Content = requestBody.Content
 
 
-	c.IndentedJSON(http.StatusOK, gin.H{"message": "todo successfully updated", "data": models.Data[c.Param("listid")].Todos[c.Param("todoid")]})
+	c.IndentedJSON(http.StatusOK, models.Data[c.Param("listid")].Todos[c.Param("todoid")])
 }
 
 func createToDo(c *gin.Context) {
@@ -119,5 +149,5 @@ func createToDo(c *gin.Context) {
 	models.Data[c.Param("listid")].Todos[key] = requestBody
 
 
-	c.IndentedJSON(http.StatusOK, gin.H{"message": "todo successfully created", "data": models.Data[c.Param("listid")].Todos[key]})
+	c.IndentedJSON(http.StatusCreated, models.Data[c.Param("listid")].Todos[key])
 }
