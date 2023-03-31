@@ -52,10 +52,9 @@ func createList(c *gin.Context) {
 
 	for _, v := range requestBody.Todos {
 		toDosKey := uuid.New().String()
-		toDo := new(models.ToDo)
-		toDo.Content = v
-		toDo.Id = toDosKey
-		requestBodyTodos[toDosKey] = toDo
+		requestBodyTodos[toDosKey] = new(models.ToDo)
+		requestBodyTodos[toDosKey].Content = v
+		requestBodyTodos[toDosKey].Id = toDosKey
 	}
 
 	models.Data[todoListKey] = new(models.ToDoList)
