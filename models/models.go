@@ -12,7 +12,6 @@ type ToDoList struct {
 }
 
 type RequestBodyList struct {
-	Id    string   `json:"listid,omitempty"`
 	Owner string   `json:"owner" binding:"required"`
 	Todos []string `json:"todos" binding:"required"`
 }

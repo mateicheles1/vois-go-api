@@ -7,7 +7,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func CustomLogger() zerolog.Logger {
+func customLogger() zerolog.Logger {
 
 	logFile, err := os.OpenFile(
         "./logs/log-file.log",
@@ -22,5 +22,5 @@ func CustomLogger() zerolog.Logger {
 	return logger
 }
 
-var Logger = CustomLogger()
+var Logger = customLogger()
  
