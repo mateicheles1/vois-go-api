@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+
 func check(err error, c *gin.Context) {
 	logs.Logger.Panic().
 		Str("Method", c.Request.Method).
