@@ -9,7 +9,11 @@ import (
 )
 
 func lists(c *gin.Context) {
-	c.IndentedJSON(http.StatusOK, models.Data)
+	if len(models.Data) == 0 {
+		c.IndentedJSON(http.StatusNoContent, "204 no content")
+	} else {
+		c.IndentedJSON(http.StatusOK, models.Data)
+	}
 }
 
 func todos(c *gin.Context) {
@@ -17,7 +21,7 @@ func todos(c *gin.Context) {
 
 
 		if !hasList {
-			c.IndentedJSON(http.StatusNotFound, gin.H{"message": "list not found"})
+			c.IndentedJSON(http.StatusNotFound, "404 resource not found")
 		} else {
 			c.IndentedJSON(http.StatusOK, models.Data[c.Param("listid")].Todos)
 		}
@@ -28,7 +32,7 @@ func getList(c *gin.Context) {
 
 
 		if !hasList {
-			c.IndentedJSON(http.StatusNotFound, gin.H{"message": "list not found"})
+			c.IndentedJSON(http.StatusNotFound, "404 resource not found")
 		} else {
 			c.IndentedJSON(http.StatusOK, models.Data[c.Param("listid")])
 		}
@@ -41,7 +45,7 @@ func createList(c *gin.Context) {
 	todoListKey := uuid.New().String()
 
 	if err := c.ShouldBindJSON(requestBody); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, err.Error())
 		check(err, c)
 	}
 
@@ -64,14 +68,14 @@ func updateList(c *gin.Context) {
 
 	_, hasList := models.Data[c.Param("listid")]
 	if !hasList {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "list not found"})
+		c.IndentedJSON(http.StatusNotFound, "404 resource not found")
 		return
 	}
 
 	requestBody := new(models.ToDoList)
 
 	if err := c.ShouldBindJSON(requestBody); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, err.Error())
 		check(err, c)
 	}
 
@@ -87,7 +91,7 @@ func deleteList(c *gin.Context) {
 
 
 		if !hasList {
-			c.IndentedJSON(http.StatusNotFound, gin.H{"message": "list not found"})
+			c.IndentedJSON(http.StatusNotFound, "404 resource not found")
 		} else {
 			delete(models.Data, c.Param("listid"))
 		}
@@ -101,13 +105,13 @@ func getToDo(c *gin.Context) {
 
 
 		if !hasList {
-			c.IndentedJSON(http.StatusNotFound, gin.H{"message": "list not found"})
+			c.IndentedJSON(http.StatusNotFound, "404 list not found")
 		}
 
 		if hasList {
 			_, hasTodo := models.Data[c.Param("listid")].Todos[c.Param("todoid")]
 			if !hasTodo {
-				c.IndentedJSON(http.StatusNotFound, gin.H{"message": "todo not found"})
+				c.IndentedJSON(http.StatusNotFound, "404 todo not found")
 			} else {
 				c.IndentedJSON(http.StatusOK, models.Data[c.Param("listid")].Todos[c.Param("todoid")])
 			}
@@ -122,13 +126,13 @@ func deleteToDo(c *gin.Context) {
 
 
 		if !hasList {
-			c.IndentedJSON(http.StatusNotFound, gin.H{"message": "list not found"})
+			c.IndentedJSON(http.StatusNotFound, "404 list not found")
 		}
 
 		if hasList {
 			_, hasTodo := models.Data[c.Param("listid")].Todos[c.Param("todoid")]
 			if !hasTodo {
-				c.IndentedJSON(http.StatusNotFound, gin.H{"message": "todo not found"})
+				c.IndentedJSON(http.StatusNotFound, "404 todo not found")
 			} else {
 				delete(models.Data[c.Param("listid")].Todos, c.Param("todoid"))
 			}
@@ -140,12 +144,12 @@ func updateToDo(c *gin.Context) {
 	_, hasList := models.Data[c.Param("listid")]
 
 		if !hasList {
-			c.IndentedJSON(http.StatusNotFound, gin.H{"message": "list not found"})
+			c.IndentedJSON(http.StatusNotFound, "404 list not found")
 			return
 		} else {
 			_, hasTodo := models.Data[c.Param("listid")].Todos[c.Param("todoid")]
 			if !hasTodo {
-				c.IndentedJSON(http.StatusNotFound, gin.H{"message": "todo not found"})
+				c.IndentedJSON(http.StatusNotFound, "404 todo not found")
 				return
 			}
 		}
@@ -153,7 +157,7 @@ func updateToDo(c *gin.Context) {
 	requestBody := new(models.ToDo)
 
 		if err := c.ShouldBindJSON(requestBody); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, err.Error())
 		check(err, c)
 	}
 
@@ -169,14 +173,14 @@ func createToDo(c *gin.Context) {
 
 
 		if !hasList {
-			c.IndentedJSON(http.StatusNotFound, gin.H{"message": "list not found"})
+			c.IndentedJSON(http.StatusNotFound, "404 list not found")
 			return
 		}
 
 	requestBody := new(models.ToDo)
 
 	if err := c.ShouldBindJSON(requestBody); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, err.Error())
 		check(err, c)
 	}
 
