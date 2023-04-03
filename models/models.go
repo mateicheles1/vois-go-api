@@ -11,9 +11,4 @@ type ToDoList struct {
 	Todos map[string]*ToDo `json:"todos,omitempty"`
 }
 
-type RequestBodyList struct {
-	Owner string   `json:"owner"`
-	Todos []string `json:"todos" binding:"required"`
-}
-
 var Data = make(map[string]*ToDoList)
