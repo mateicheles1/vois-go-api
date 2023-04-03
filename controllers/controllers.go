@@ -107,9 +107,7 @@ func GetToDo(c *gin.Context) {
 
 		if !hasList {
 			c.IndentedJSON(http.StatusNotFound, "404 list not found")
-		}
-
-		if hasList {
+		} else {
 			_, hasTodo := models.Data[c.Param("listid")].Todos[c.Param("todoid")]
 			if !hasTodo {
 				c.IndentedJSON(http.StatusNotFound, "404 todo not found")
@@ -128,9 +126,7 @@ func DeleteToDo(c *gin.Context) {
 
 		if !hasList {
 			c.IndentedJSON(http.StatusNotFound, "404 list not found")
-		}
-
-		if hasList {
+		} else {
 			_, hasTodo := models.Data[c.Param("listid")].Todos[c.Param("todoid")]
 			if !hasTodo {
 				c.IndentedJSON(http.StatusNotFound, "404 todo not found")
