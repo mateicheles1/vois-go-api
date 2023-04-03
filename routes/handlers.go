@@ -10,7 +10,7 @@ import (
 
 func lists(c *gin.Context) {
 	if len(models.Data) == 0 {
-		c.IndentedJSON(http.StatusNoContent, "204 no content")
+		c.Status(http.StatusNoContent)
 	} else {
 		c.IndentedJSON(http.StatusOK, models.Data)
 	}
@@ -21,7 +21,7 @@ func todos(c *gin.Context) {
 
 
 		if !hasList {
-			c.IndentedJSON(http.StatusNotFound, "404 resource not found")
+			c.Status(http.StatusNotFound)
 		} else {
 			c.IndentedJSON(http.StatusOK, models.Data[c.Param("listid")].Todos)
 		}
@@ -32,7 +32,7 @@ func getList(c *gin.Context) {
 
 
 		if !hasList {
-			c.IndentedJSON(http.StatusNotFound, "404 resource not found")
+			c.Status(http.StatusNotFound)
 		} else {
 			c.IndentedJSON(http.StatusOK, models.Data[c.Param("listid")])
 		}
@@ -45,7 +45,7 @@ func createList(c *gin.Context) {
 	todoListKey := uuid.New().String()
 
 	if err := c.ShouldBindJSON(requestBody); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, err.Error())
+		c.IndentedJSON(http.StatusBadRequest, "error reading request")
 		check(err, c)
 	}
 
@@ -68,14 +68,14 @@ func updateList(c *gin.Context) {
 
 	_, hasList := models.Data[c.Param("listid")]
 	if !hasList {
-		c.IndentedJSON(http.StatusNotFound, "404 resource not found")
+		c.Status(http.StatusNotFound)
 		return
 	}
 
 	requestBody := new(models.ToDoList)
 
 	if err := c.ShouldBindJSON(requestBody); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, err.Error())
+		c.IndentedJSON(http.StatusBadRequest, "error reading request")
 		check(err, c)
 	}
 
@@ -91,7 +91,7 @@ func deleteList(c *gin.Context) {
 
 
 		if !hasList {
-			c.IndentedJSON(http.StatusNotFound, "404 resource not found")
+			c.Status(http.StatusNotFound)
 		} else {
 			delete(models.Data, c.Param("listid"))
 		}
@@ -157,7 +157,7 @@ func updateToDo(c *gin.Context) {
 	requestBody := new(models.ToDo)
 
 		if err := c.ShouldBindJSON(requestBody); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, err.Error())
+		c.IndentedJSON(http.StatusBadRequest, "error reading request")
 		check(err, c)
 	}
 
@@ -180,7 +180,7 @@ func createToDo(c *gin.Context) {
 	requestBody := new(models.ToDo)
 
 	if err := c.ShouldBindJSON(requestBody); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, err.Error())
+		c.IndentedJSON(http.StatusBadRequest, "error reading request")
 		check(err, c)
 	}
 
