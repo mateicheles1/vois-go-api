@@ -1,4 +1,4 @@
-package routes
+package middleware
 
 import (
 	"gogin-api/logs"
@@ -8,7 +8,7 @@ import (
 )
 
 
-func check(err error, c *gin.Context) {
+func Check(err error, c *gin.Context) {
 	logs.Logger.Panic().
 		Str("Method", c.Request.Method).
 		Str("Path", c.Request.URL.Path).

@@ -1,6 +1,7 @@
-package routes
+package controllers
 
 import (
+	"gogin-api/middleware"
 	"gogin-api/models"
 	"net/http"
 
@@ -8,7 +9,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func lists(c *gin.Context) {
+func Lists(c *gin.Context) {
 	if len(models.Data) == 0 {
 		c.Status(http.StatusNoContent)
 	} else {
@@ -16,7 +17,7 @@ func lists(c *gin.Context) {
 	}
 }
 
-func todos(c *gin.Context) {
+func Todos(c *gin.Context) {
 	_, hasList := models.Data[c.Param("listid")]
 
 
@@ -27,7 +28,7 @@ func todos(c *gin.Context) {
 		}
 }
 
-func getList(c *gin.Context) {
+func GetList(c *gin.Context) {
 	_, hasList := models.Data[c.Param("listid")]
 
 
@@ -39,14 +40,14 @@ func getList(c *gin.Context) {
 
 }
 
-func createList(c *gin.Context) {
+func CreateList(c *gin.Context) {
 	requestBody := new(models.RequestBodyList)
 	requestBodyTodos := make(map[string]*models.ToDo)
 	todoListKey := uuid.New().String()
 
 	if err := c.ShouldBindJSON(requestBody); err != nil {
 		c.IndentedJSON(http.StatusBadRequest, "error reading request")
-		check(err, c)
+		middleware.Check(err, c)
 	}
 
 	for _, v := range requestBody.Todos {
@@ -64,7 +65,7 @@ func createList(c *gin.Context) {
 	c.IndentedJSON(http.StatusCreated, models.Data[todoListKey])
 }
 
-func updateList(c *gin.Context) {
+func PatchList(c *gin.Context) {
 
 	_, hasList := models.Data[c.Param("listid")]
 	if !hasList {
@@ -76,7 +77,7 @@ func updateList(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(requestBody); err != nil {
 		c.IndentedJSON(http.StatusBadRequest, "error reading request")
-		check(err, c)
+		middleware.Check(err, c)
 	}
 
 	models.Data[c.Param("listid")].Owner = requestBody.Owner
@@ -85,7 +86,7 @@ func updateList(c *gin.Context) {
 }
 
 
-func deleteList(c *gin.Context) {
+func DeleteList(c *gin.Context) {
 
 	_, hasList := models.Data[c.Param("listid")]
 
@@ -100,7 +101,7 @@ func deleteList(c *gin.Context) {
 }
 
 
-func getToDo(c *gin.Context) {
+func GetToDo(c *gin.Context) {
 	_, hasList := models.Data[c.Param("listid")]
 
 
@@ -120,7 +121,7 @@ func getToDo(c *gin.Context) {
 }
 
 
-func deleteToDo(c *gin.Context) {
+func DeleteToDo(c *gin.Context) {
 	
 	_, hasList := models.Data[c.Param("listid")]
 
@@ -140,7 +141,7 @@ func deleteToDo(c *gin.Context) {
 
 }
 
-func updateToDo(c *gin.Context) {
+func PatchToDo(c *gin.Context) {
 	_, hasList := models.Data[c.Param("listid")]
 
 		if !hasList {
@@ -158,7 +159,7 @@ func updateToDo(c *gin.Context) {
 
 		if err := c.ShouldBindJSON(requestBody); err != nil {
 		c.IndentedJSON(http.StatusBadRequest, "error reading request")
-		check(err, c)
+		middleware.Check(err, c)
 	}
 
 
@@ -168,7 +169,7 @@ func updateToDo(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, models.Data[c.Param("listid")].Todos[c.Param("todoid")])
 }
 
-func createToDo(c *gin.Context) {
+func CreateToDo(c *gin.Context) {
 	_, hasList := models.Data[c.Param("listid")]
 
 
@@ -181,7 +182,7 @@ func createToDo(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(requestBody); err != nil {
 		c.IndentedJSON(http.StatusBadRequest, "error reading request")
-		check(err, c)
+		middleware.Check(err, c)
 	}
 
 	key := uuid.New().String()
