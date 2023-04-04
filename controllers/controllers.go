@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"gogin-api/middleware"
 	"gogin-api/models"
 	"net/http"
 
@@ -46,8 +45,8 @@ func CreateList(c *gin.Context) {
 	todoListKey := uuid.New().String()
 
 	if err := c.ShouldBindJSON(requestBody); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, "error reading request")
-		middleware.Check(err, c)
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
 	}
 
 	for _, v := range requestBody.Todos {
@@ -78,8 +77,8 @@ func PatchList(c *gin.Context) {
 	requestBody := new(models.ToDoList)
 
 	if err := c.ShouldBindJSON(requestBody); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, "error reading request")
-		middleware.Check(err, c)
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
 	}
 
 	models.Data[c.Param("listid")].Owner = requestBody.Owner
@@ -156,8 +155,8 @@ func PatchToDo(c *gin.Context) {
 	requestBody := new(models.ToDo)
 
 		if err := c.ShouldBindJSON(requestBody); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, "error reading request")
-		middleware.Check(err, c)
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
 	}
 
 
@@ -179,8 +178,8 @@ func CreateToDo(c *gin.Context) {
 	requestBody := new(models.ToDo)
 
 	if err := c.ShouldBindJSON(requestBody); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, "error reading request")
-		middleware.Check(err, c)
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
 	}
 
 	key := uuid.New().String()

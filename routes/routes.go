@@ -3,6 +3,7 @@ package routes
 import (
 	"gogin-api/controllers"
 	"gogin-api/logs"
+	"gogin-api/middleware"
 
 	"github.com/gin-gonic/gin"
 )
@@ -13,6 +14,9 @@ func SetupRoutes() {
 	listRouter := r.Group("/api/v2/list")
 	todoRouter := r.Group("/api/v2/list/:listid/todo")
 
+	listRouter.Use(middleware.ErrorHandler)
+	todoRouter.Use(middleware.ErrorHandler)
+	
 	r.GET("api/v2/lists", controllers.Lists)
 	r.GET("api/v2/list/:listid/todos", controllers.Todos)
 	
