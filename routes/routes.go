@@ -10,20 +10,21 @@ import (
 
 func SetupRoutes() {
 	r := gin.Default()
-	r2 := r.Group("/api/v2/list/:listid/todo")
+	listRouter := r.Group("/api/v2/list")
+	todoRouter := r.Group("/api/v2/list/:listid/todo")
 
 	r.GET("api/v2/lists", controllers.Lists)
 	r.GET("api/v2/list/:listid/todos", controllers.Todos)
 	
-	r.GET("api/v2/list/:listid", controllers.GetList)
-	r.POST("api/v2/list/", controllers.CreateList)
-	r.PATCH("api/v2/list/:listid", controllers.PatchList)
-	r.DELETE("api/v2/list/:listid", controllers.DeleteList)
+	listRouter.GET("/:listid", controllers.GetList)
+	listRouter.POST("/", controllers.CreateList)
+	listRouter.PATCH("/:listid", controllers.PatchList)
+	listRouter.DELETE("/:listid", controllers.DeleteList)
 
-	r2.GET("/:todoid", controllers.GetToDo)
-	r2.POST("/", controllers.CreateToDo)
-	r2.PATCH("/:todoid", controllers.PatchToDo)
-	r2.DELETE("/:todoid", controllers.DeleteToDo)
+	todoRouter.GET("/:todoid", controllers.GetToDo)
+	todoRouter.POST("/", controllers.CreateToDo)
+	todoRouter.PATCH("/:todoid", controllers.PatchToDo)
+	todoRouter.DELETE("/:todoid", controllers.DeleteToDo)
 
 	if err := r.Run(); err != nil {
 		logs.Logger.Fatal().Msgf("Could not start the server due to: %s", err.Error())
