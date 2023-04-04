@@ -52,15 +52,17 @@ func CreateList(c *gin.Context) {
 
 	for _, v := range requestBody.Todos {
 		toDosKey := uuid.New().String()
-		requestBodyTodos[toDosKey] = new(models.ToDo)
-		requestBodyTodos[toDosKey].Content = v
-		requestBodyTodos[toDosKey].Id = toDosKey
+		requestBodyTodos[toDosKey] = &models.ToDo{
+			Content: v,
+			Id: toDosKey,
+		}
 	}
 
-	models.Data[todoListKey] = new(models.ToDoList)
-	models.Data[todoListKey].Id = todoListKey
-	models.Data[todoListKey].Owner = requestBody.Owner
-	models.Data[todoListKey].Todos = requestBodyTodos
+	models.Data[todoListKey] = &models.ToDoList{
+		Id: todoListKey,
+		Owner: requestBody.Owner,
+		Todos: requestBodyTodos,
+	}
 
 	c.IndentedJSON(http.StatusCreated, models.Data[todoListKey])
 }
