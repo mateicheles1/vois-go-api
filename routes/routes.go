@@ -10,6 +10,7 @@ import (
 
 func SetupRoutes() {
 	r := gin.Default()
+	r2 := r.Group("/api/v2/list/:listid/todo")
 
 	r.GET("api/v2/lists", controllers.Lists)
 	r.GET("api/v2/list/:listid/todos", controllers.Todos)
@@ -19,10 +20,10 @@ func SetupRoutes() {
 	r.PATCH("api/v2/list/:listid", controllers.PatchList)
 	r.DELETE("api/v2/list/:listid", controllers.DeleteList)
 
-	r.GET("api/v2/list/:listid/todo/:todoid", controllers.GetToDo)
-	r.POST("api/v2/list/:listid/todo", controllers.CreateToDo)
-	r.PATCH("api/v2/list/:listid/todo/:todoid", controllers.PatchToDo)
-	r.DELETE("api/v2/list/:listid/todo/:todoid", controllers.DeleteToDo)
+	r2.GET("/:todoid", controllers.GetToDo)
+	r2.POST("/", controllers.CreateToDo)
+	r2.PATCH("/:todoid", controllers.PatchToDo)
+	r2.DELETE("/:todoid", controllers.DeleteToDo)
 
 	if err := r.Run(); err != nil {
 		logs.Logger.Fatal().Msgf("Could not start the server due to: %s", err.Error())
