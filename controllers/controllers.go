@@ -19,12 +19,16 @@ func Lists(c *gin.Context) {
 func Todos(c *gin.Context) {
 	_, hasList := models.Data[c.Param("listid")]
 
-
 		if !hasList {
 			c.Status(http.StatusNotFound)
 		} else {
-			c.IndentedJSON(http.StatusOK, models.Data[c.Param("listid")].Todos)
+			var todos []*models.ToDo
+			for _, todo := range models.Data[c.Param("listid")].Todos {
+				todos = append(todos, todo)
+			}
+			c.IndentedJSON(http.StatusOK, todos)
 		}
+
 }
 
 func GetList(c *gin.Context) {

@@ -13,7 +13,6 @@ func SetupRoutes() {
 	r := gin.Default()
 	listRouter := r.Group("/api/v2/list")
 	todoRouter := r.Group("/api/v2/list/:listid/todo")
-
 	listRouter.Use(middleware.ErrorHandler)
 	todoRouter.Use(middleware.ErrorHandler)
 	
