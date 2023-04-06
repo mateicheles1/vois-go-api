@@ -57,7 +57,6 @@ func CreateList(c *gin.Context) {
 		toDosKey := uuid.New().String()
 		requestBodyTodos[toDosKey] = &models.ToDo{
 			Id: toDosKey,
-			ListId: todoListKey,
 			Content: v,
 		}
 	}
@@ -117,7 +116,7 @@ func GetToDo(c *gin.Context) {
 			if !hasToDo {
 				c.JSON(404, "404 todo not found")
 			} else {
-				c.JSON(200, gin.H{"todoid": todo.Id, "content": todo.Content})
+				c.JSON(200, todo)
 			}
 	}
 }
@@ -190,7 +189,6 @@ func CreateToDo(c *gin.Context) {
 	
 	models.Data[c.Param("listid")].Todos[key] = &models.ToDo{
 		Id: key,
-		ListId: c.Param("listid"),
 		Content: requestBody.Content,
 	}
 

@@ -2,7 +2,6 @@ package models
 
 type ToDo struct {
 	Id      string `json:"todoid,omitempty"`
-	ListId  string `json:"todolistid,omitempty"`
 	Content string `json:"content" binding:"required"`
 }
 
