@@ -19,15 +19,15 @@ func SetupRoutes() {
 	r.GET("api/v2/lists", controllers.Lists)
 	r.GET("api/v2/list/:listid/todos", controllers.Todos)
 	
-	listRouter.GET("/:listid", controllers.GetList)
-	listRouter.POST("/", controllers.CreateList)
-	listRouter.PATCH("/:listid", controllers.PatchList)
-	listRouter.DELETE("/:listid", controllers.DeleteList)
+	r.GET("/api/v2/list/:listid", controllers.GetList)
+	r.POST("/api/v2/list", controllers.CreateList)
+	r.PATCH("api/v2/list/:listid", controllers.PatchList)
+	r.DELETE("api/v2/list/:listid", controllers.DeleteList)
 
-	todoRouter.GET("/:todoid", controllers.GetToDo)
-	todoRouter.POST("/", controllers.CreateToDo)
-	todoRouter.PATCH("/:todoid", controllers.PatchToDo)
-	todoRouter.DELETE("/:todoid", controllers.DeleteToDo)
+	r.GET("api/v2/todo/:todoid", controllers.GetToDo)
+	r.POST("api/v2/list/:listid/todo", controllers.CreateToDo)
+	r.PATCH("/api/v2/todo/:todoid", controllers.PatchToDo)
+	r.DELETE("api/v2/todo/:todoid", controllers.DeleteToDo)
 
 	if err := r.Run(); err != nil {
 		logs.Logger.Fatal().Msgf("Could not start the server due to: %s", err.Error())

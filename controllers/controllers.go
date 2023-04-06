@@ -12,21 +12,21 @@ func Lists(c *gin.Context) {
 	if len(models.Data) == 0 {
 		c.Status(http.StatusNoContent)
 	} else {
-		c.IndentedJSON(http.StatusOK, models.Data)
+		c.JSON(200, models.Data)
 	}
 }
 
 func Todos(c *gin.Context) {
-	_, hasList := models.Data[c.Param("listid")]
+	list, hasList := models.Data[c.Param("listid")]
 
 		if !hasList {
-			c.Status(http.StatusNotFound)
+			c.Status(404)
 		} else {
 			var todos []*models.ToDo
-			for _, todo := range models.Data[c.Param("listid")].Todos {
+			for _, todo := range list.Todos {
 				todos = append(todos, todo)
 			}
-			c.IndentedJSON(http.StatusOK, todos)
+			c.JSON(200, todos)
 		}
 
 }
@@ -38,7 +38,7 @@ func GetList(c *gin.Context) {
 		if !hasList {
 			c.Status(http.StatusNotFound)
 		} else {
-			c.IndentedJSON(http.StatusOK, models.Data[c.Param("listid")])
+			c.JSON(200, models.Data[c.Param("listid")])
 		}
 
 }
@@ -56,8 +56,9 @@ func CreateList(c *gin.Context) {
 	for _, v := range requestBody.Todos {
 		toDosKey := uuid.New().String()
 		requestBodyTodos[toDosKey] = &models.ToDo{
-			Content: v,
 			Id: toDosKey,
+			ListId: todoListKey,
+			Content: v,
 		}
 	}
 
@@ -67,14 +68,14 @@ func CreateList(c *gin.Context) {
 		Todos: requestBodyTodos,
 	}
 
-	c.IndentedJSON(http.StatusCreated, models.Data[todoListKey])
+	c.JSON(201, models.Data[todoListKey])
 }
 
 func PatchList(c *gin.Context) {
 
 	_, hasList := models.Data[c.Param("listid")]
 	if !hasList {
-		c.Status(http.StatusNotFound)
+		c.Status(404)
 		return
 	}
 
@@ -87,7 +88,7 @@ func PatchList(c *gin.Context) {
 
 	models.Data[c.Param("listid")].Owner = requestBody.Owner
 
-	c.IndentedJSON(http.StatusOK, models.Data[c.Param("listid")])
+	c.JSON(200, models.Data[c.Param("listid")])
 }
 
 
@@ -97,7 +98,7 @@ func DeleteList(c *gin.Context) {
 
 
 		if !hasList {
-			c.Status(http.StatusNotFound)
+			c.Status(404)
 		} else {
 			delete(models.Data, c.Param("listid"))
 		}
@@ -107,21 +108,20 @@ func DeleteList(c *gin.Context) {
 
 
 func GetToDo(c *gin.Context) {
-	_, hasList := models.Data[c.Param("listid")]
-
+	list, hasList := models.Data[c.Param("listid")]
 
 		if !hasList {
-			c.IndentedJSON(http.StatusNotFound, "404 list not found")
+			c.JSON(404, "404 list not found")
 		} else {
-			_, hasTodo := models.Data[c.Param("listid")].Todos[c.Param("todoid")]
-			if !hasTodo {
-				c.IndentedJSON(http.StatusNotFound, "404 todo not found")
+			todo, hasToDo := list.Todos[c.Param("todoid")]
+			if !hasToDo {
+				c.JSON(404, "404 todo not found")
 			} else {
-				c.IndentedJSON(http.StatusOK, models.Data[c.Param("listid")].Todos[c.Param("todoid")])
+				c.JSON(200, gin.H{"todoid": todo.Id, "content": todo.Content})
 			}
-		}
-
+	}
 }
+
 
 
 func DeleteToDo(c *gin.Context) {
@@ -130,11 +130,11 @@ func DeleteToDo(c *gin.Context) {
 
 
 		if !hasList {
-			c.IndentedJSON(http.StatusNotFound, "404 list not found")
+			c.JSON(404, "404 list not found")
 		} else {
 			_, hasTodo := models.Data[c.Param("listid")].Todos[c.Param("todoid")]
 			if !hasTodo {
-				c.IndentedJSON(http.StatusNotFound, "404 todo not found")
+				c.JSON(404, "404 todo not found")
 			} else {
 				delete(models.Data[c.Param("listid")].Todos, c.Param("todoid"))
 			}
@@ -146,12 +146,12 @@ func PatchToDo(c *gin.Context) {
 	_, hasList := models.Data[c.Param("listid")]
 
 		if !hasList {
-			c.IndentedJSON(http.StatusNotFound, "404 list not found")
+			c.JSON(404, "404 list not found")
 			return
 		} else {
 			_, hasTodo := models.Data[c.Param("listid")].Todos[c.Param("todoid")]
 			if !hasTodo {
-				c.IndentedJSON(http.StatusNotFound, "404 todo not found")
+				c.JSON(404, "404 todo not found")
 				return
 			}
 		}
@@ -167,7 +167,7 @@ func PatchToDo(c *gin.Context) {
 	models.Data[c.Param("listid")].Todos[c.Param("todoid")].Content = requestBody.Content
 
 
-	c.IndentedJSON(http.StatusOK, models.Data[c.Param("listid")].Todos[c.Param("todoid")])
+	c.JSON(200, models.Data[c.Param("listid")].Todos[c.Param("todoid")])
 }
 
 func CreateToDo(c *gin.Context) {
@@ -175,7 +175,7 @@ func CreateToDo(c *gin.Context) {
 
 
 		if !hasList {
-			c.IndentedJSON(http.StatusNotFound, "404 list not found")
+			c.JSON(404, "404 list not found")
 			return
 		}
 
@@ -190,9 +190,10 @@ func CreateToDo(c *gin.Context) {
 	
 	models.Data[c.Param("listid")].Todos[key] = &models.ToDo{
 		Id: key,
+		ListId: c.Param("listid"),
 		Content: requestBody.Content,
 	}
 
 
-	c.IndentedJSON(http.StatusCreated, models.Data[c.Param("listid")].Todos[key])
+	c.JSON(201, models.Data[c.Param("listid")].Todos[key])
 }
