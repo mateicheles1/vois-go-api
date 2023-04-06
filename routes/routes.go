@@ -15,17 +15,17 @@ func SetupRoutes() {
 	r.Use(middleware.ErrorHandler)
 
 	r.GET("api/v2/lists", controllers.Lists)
-	r.GET("api/v2/list/:listid/todos", controllers.Todos)
+	r.GET("api/v2/lists/:listid/todos", controllers.Todos)
 	
-	r.GET("/api/v2/list/:listid", controllers.GetList)
-	r.POST("/api/v2/list", controllers.CreateList)
-	r.PATCH("api/v2/list/:listid", controllers.PatchList)
-	r.DELETE("api/v2/list/:listid", controllers.DeleteList)
+	r.GET("/api/v2/lists/:listid", controllers.GetList)
+	r.POST("/api/v2/lists", controllers.CreateList)
+	r.PATCH("api/v2/lists/:listid", controllers.PatchList)
+	r.DELETE("api/v2/lists/:listid", controllers.DeleteList)
 
-	r.GET("api/v2/list/:listid/todo/:todoid", controllers.GetToDo)
-	r.POST("api/v2/list/:listid/todo", controllers.CreateToDo)
-	r.PATCH("/api/v2/list/:listid/todo/:todoid", controllers.PatchToDo)
-	r.DELETE("api/v2/list/:listid/todo/:todoid", controllers.DeleteToDo)
+	r.GET("api/v2/lists/:listid/todos/:todoid", controllers.GetToDo)
+	r.POST("api/v2/lists/:listid/todos", controllers.CreateToDo)
+	r.PATCH("/api/v2/lists/:listid/todos/:todoid", controllers.PatchToDo)
+	r.DELETE("api/v2/lists/:listid/todos/:todoid", controllers.DeleteToDo)
 
 	if err := r.Run(); err != nil {
 		logs.Logger.Fatal().Msgf("Could not start the server due to: %s", err.Error())
