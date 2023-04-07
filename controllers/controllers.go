@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"gogin-api/models"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -10,7 +9,7 @@ import (
 
 func Lists(c *gin.Context) {
 	if len(models.Data) == 0 {
-		c.Status(http.StatusNoContent)
+		c.Status(204)
 	} else {
 		c.JSON(200, models.Data)
 	}
