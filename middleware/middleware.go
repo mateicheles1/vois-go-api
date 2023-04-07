@@ -20,6 +20,6 @@ func ErrorHandler(c *gin.Context) {
 		}
 
 		if len(c.Errors) != 0 {
-			c.IndentedJSON(-1, "error processing request")
+			c.JSON(-1, "error processing request")
 		}
 }

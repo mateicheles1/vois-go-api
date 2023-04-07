@@ -10,7 +10,7 @@ import (
 
 
 func SetupRoutes() {
-	r := gin.Default()
+	r := gin.New()
 
 	r.Use(middleware.ErrorHandler)
 

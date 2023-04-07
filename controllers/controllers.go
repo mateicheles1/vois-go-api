@@ -36,7 +36,7 @@ func GetList(c *gin.Context) {
 
 
 		if !hasList {
-			c.Status(http.StatusNotFound)
+			c.Status(404)
 		} else {
 			c.JSON(200, models.Data[c.Param("listid")])
 		}
@@ -49,7 +49,7 @@ func CreateList(c *gin.Context) {
 	todoListKey := uuid.New().String()
 
 	if err := c.ShouldBindJSON(requestBody); err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
+		c.AbortWithError(400, err)
 		return
 	}
 
@@ -81,7 +81,7 @@ func PatchList(c *gin.Context) {
 	requestBody := new(models.ToDoList)
 
 	if err := c.ShouldBindJSON(requestBody); err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
+		c.AbortWithError(400, err)
 		return
 	}
 
@@ -158,7 +158,7 @@ func PatchToDo(c *gin.Context) {
 	requestBody := new(models.ToDo)
 
 		if err := c.ShouldBindJSON(requestBody); err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
+		c.AbortWithError(400, err)
 		return
 	}
 
@@ -181,7 +181,7 @@ func CreateToDo(c *gin.Context) {
 	requestBody := new(models.ToDo)
 
 	if err := c.ShouldBindJSON(requestBody); err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
+		c.AbortWithError(400, err)
 		return
 	}
 
