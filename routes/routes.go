@@ -9,7 +9,7 @@ import (
 )
 
 func SetupRoutes() {
-	r := gin.New()
+	r := gin.Default()
 
 	r.Use(middleware.ErrorHandler)
 	r.GET("api/v2/lists", controllers.Lists)
