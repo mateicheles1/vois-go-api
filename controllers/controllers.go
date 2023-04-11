@@ -47,7 +47,7 @@ func CreateList(c *gin.Context) {
 	requestBodyTodos := make(map[string]*models.ToDo)
 	todoListKey := uuid.New().String()
 
-	if err := c.ShouldBindJSON(requestBody); err != nil {
+	if err := c.BindJSON(requestBody); err != nil {
 		c.AbortWithError(400, err)
 		return
 	}
