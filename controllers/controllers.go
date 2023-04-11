@@ -20,9 +20,7 @@ func Lists(c *gin.Context) {
 }
 
 func Todos(c *gin.Context) {
-	list, hasList := models.Data[c.Param("listid")]
-
-	if !hasList {
+	if list, hasList := models.Data[c.Param("listid")]; !hasList {
 		c.Status(404)
 	} else {
 		var todos []*models.ToDo
@@ -35,9 +33,8 @@ func Todos(c *gin.Context) {
 }
 
 func GetList(c *gin.Context) {
-	_, hasList := models.Data[c.Param("listid")]
+	if _, hasList := models.Data[c.Param("listid")]; !hasList {
 
-	if !hasList {
 		c.Status(404)
 	} else {
 		c.JSON(200, models.Data[c.Param("listid")])
@@ -74,8 +71,7 @@ func CreateList(c *gin.Context) {
 
 func PatchList(c *gin.Context) {
 
-	_, hasList := models.Data[c.Param("listid")]
-	if !hasList {
+	if _, hasList := models.Data[c.Param("listid")]; !hasList {
 		c.Status(404)
 		return
 	}
@@ -94,9 +90,7 @@ func PatchList(c *gin.Context) {
 
 func DeleteList(c *gin.Context) {
 
-	_, hasList := models.Data[c.Param("listid")]
-
-	if !hasList {
+	if _, hasList := models.Data[c.Param("listid")]; !hasList {
 		c.Status(404)
 	} else {
 		delete(models.Data, c.Param("listid"))
@@ -106,9 +100,7 @@ func DeleteList(c *gin.Context) {
 
 func GetToDo(c *gin.Context) {
 	for _, list := range models.Data {
-		todo, hasToDo := list.Todos[c.Param("todoid")]
-
-		if !hasToDo {
+		if todo, hasToDo := list.Todos[c.Param("todoid")]; !hasToDo {
 			c.Status(404)
 		} else {
 			c.JSON(200, todo)
@@ -120,9 +112,7 @@ func GetToDo(c *gin.Context) {
 func DeleteToDo(c *gin.Context) {
 
 	for k, list := range models.Data {
-		_, hasToDo := list.Todos[c.Param("todoid")]
-
-		if !hasToDo {
+		if _, hasToDo := list.Todos[c.Param("todoid")]; !hasToDo {
 			c.Status(404)
 		} else {
 			delete(models.Data[k].Todos, c.Param("todoid"))
@@ -141,9 +131,8 @@ func PatchToDo(c *gin.Context) {
 	}
 
 	for k := range models.Data {
-		_, hasToDo := models.Data[k].Todos[c.Param("todoid")]
+		if _, hasToDo := models.Data[k].Todos[c.Param("todoid")]; !hasToDo {
 
-		if !hasToDo {
 			c.Status(404)
 		} else {
 			models.Data[k].Todos[c.Param("todoid")].Content = requestBody.Content
@@ -154,9 +143,7 @@ func PatchToDo(c *gin.Context) {
 }
 
 func CreateToDo(c *gin.Context) {
-	_, hasList := models.Data[c.Param("listid")]
-
-	if !hasList {
+	if _, hasList := models.Data[c.Param("listid")]; !hasList {
 		c.Status(404)
 		return
 	}
