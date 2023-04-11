@@ -11,7 +11,11 @@ func Lists(c *gin.Context) {
 	if len(models.Data) == 0 {
 		c.Status(204)
 	} else {
-		c.JSON(200, models.Data)
+		var lists []*models.ToDoList
+		for _, list := range models.Data {
+			lists = append(lists, list)
+		}
+		c.JSON(200, lists)
 	}
 }
 
@@ -46,7 +50,7 @@ func CreateList(c *gin.Context) {
 	requestBodyTodos := make(map[string]*models.ToDo)
 	todoListKey := uuid.New().String()
 
-	if err := c.ShouldBindJSON(requestBody); err != nil {
+	if err := c.BindJSON(requestBody); err != nil {
 		c.AbortWithError(400, err)
 		return
 	}
@@ -65,7 +69,7 @@ func CreateList(c *gin.Context) {
 		Todos: requestBodyTodos,
 	}
 
-	c.String(201, "List with id: %s successfully created", todoListKey)
+	c.Status(200)
 }
 
 func PatchList(c *gin.Context) {
@@ -78,14 +82,14 @@ func PatchList(c *gin.Context) {
 
 	requestBody := new(models.ToDoList)
 
-	if err := c.ShouldBindJSON(requestBody); err != nil {
+	if err := c.BindJSON(requestBody); err != nil {
 		c.AbortWithError(400, err)
 		return
 	}
 
 	models.Data[c.Param("listid")].Owner = requestBody.Owner
 
-	c.String(200, "list successfully patched")
+	c.Status(200)
 }
 
 func DeleteList(c *gin.Context) {
@@ -96,81 +100,70 @@ func DeleteList(c *gin.Context) {
 		c.Status(404)
 	} else {
 		delete(models.Data, c.Param("listid"))
-		c.String(-1, "list successfully deleted")
 	}
 
 }
 
 func GetToDo(c *gin.Context) {
-	list, hasList := models.Data[c.Param("listid")]
-
-	if !hasList {
-		c.JSON(404, "404 list not found")
-	} else {
+	for _, list := range models.Data {
 		todo, hasToDo := list.Todos[c.Param("todoid")]
+
 		if !hasToDo {
-			c.JSON(404, "404 todo not found")
+			c.Status(404)
 		} else {
 			c.JSON(200, todo)
+			break
 		}
 	}
 }
 
 func DeleteToDo(c *gin.Context) {
 
-	_, hasList := models.Data[c.Param("listid")]
+	for k, list := range models.Data {
+		_, hasToDo := list.Todos[c.Param("todoid")]
 
-	if !hasList {
-		c.JSON(404, "404 list not found")
-	} else {
-		_, hasTodo := models.Data[c.Param("listid")].Todos[c.Param("todoid")]
-		if !hasTodo {
-			c.JSON(404, "404 todo not found")
+		if !hasToDo {
+			c.Status(404)
 		} else {
-			delete(models.Data[c.Param("listid")].Todos, c.Param("todoid"))
-			c.String(-1, "todo successfully deleted")
+			delete(models.Data[k].Todos, c.Param("todoid"))
+			break
 		}
 	}
 
 }
 
 func PatchToDo(c *gin.Context) {
-	_, hasList := models.Data[c.Param("listid")]
-
-	if !hasList {
-		c.JSON(404, "404 list not found")
-		return
-	} else {
-		_, hasTodo := models.Data[c.Param("listid")].Todos[c.Param("todoid")]
-		if !hasTodo {
-			c.JSON(404, "404 todo not found")
-			return
-		}
-	}
-
 	requestBody := new(models.ToDo)
 
-	if err := c.ShouldBindJSON(requestBody); err != nil {
+	if err := c.BindJSON(requestBody); err != nil {
 		c.AbortWithError(400, err)
 		return
 	}
 
-	models.Data[c.Param("listid")].Todos[c.Param("todoid")].Content = requestBody.Content
+	for k := range models.Data {
+		_, hasToDo := models.Data[k].Todos[c.Param("todoid")]
 
-	c.String(200, "todo successfully patched")
+		if !hasToDo {
+			c.Status(404)
+		} else {
+			models.Data[k].Todos[c.Param("todoid")].Content = requestBody.Content
+			c.Status(200)
+			break
+		}
+	}
 }
 
 func CreateToDo(c *gin.Context) {
 	_, hasList := models.Data[c.Param("listid")]
 
 	if !hasList {
-		c.JSON(404, "404 list not found")
+		c.Status(404)
 		return
 	}
 
 	requestBody := new(models.ToDo)
 
-	if err := c.ShouldBindJSON(requestBody); err != nil {
+	if err := c.BindJSON(requestBody); err != nil {
 		c.AbortWithError(400, err)
 		return
 	}
@@ -182,5 +175,5 @@ func CreateToDo(c *gin.Context) {
 		Content: requestBody.Content,
 	}
 
-	c.String(201, "todo with id: %s successfully created", key)
+	c.Status(200)
 }
