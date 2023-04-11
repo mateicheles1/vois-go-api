@@ -69,7 +69,7 @@ func CreateList(c *gin.Context) {
 		Todos: requestBodyTodos,
 	}
 
-	c.Status(200)
+	c.Status(201)
 }
 
 func PatchList(c *gin.Context) {
@@ -175,5 +175,5 @@ func CreateToDo(c *gin.Context) {
 		Content: requestBody.Content,
 	}
 
-	c.Status(200)
+	c.Status(201)
 }
