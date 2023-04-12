@@ -8,6 +8,7 @@ import (
 )
 
 func Lists(c *gin.Context) {
+
 	if len(models.Data) == 0 {
 		c.Status(204)
 	} else {
@@ -17,6 +18,7 @@ func Lists(c *gin.Context) {
 		}
 		c.JSON(200, lists)
 	}
+
 }
 
 func Todos(c *gin.Context) {
@@ -38,6 +40,7 @@ func Todos(c *gin.Context) {
 }
 
 func GetList(c *gin.Context) {
+
 	if list, hasList := models.Data[c.Param("listid")]; !hasList {
 		c.Status(404)
 	} else {
@@ -84,6 +87,7 @@ func PatchList(c *gin.Context) {
 		c.Status(404)
 		return
 	}
+
 	requestBody := new(models.ToDoList)
 
 	if err := c.ShouldBindJSON(requestBody); err != nil {
@@ -110,6 +114,7 @@ func DeleteList(c *gin.Context) {
 
 
 func GetToDo(c *gin.Context) {
+
 	for _, list := range models.Data {
 		if todo, hasToDo := list.Todos[c.Param("todoid")]; !hasToDo {
 			c.Status(404)
@@ -122,6 +127,7 @@ func GetToDo(c *gin.Context) {
 			break
 		}
 	}
+
 }
 
 
@@ -173,8 +179,6 @@ func CreateToDo(c *gin.Context) {
 		c.AbortWithError(400, err)
 		return
 	}
-
-	
 
 	key := uuid.New().String()
 	
