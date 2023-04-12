@@ -13,8 +13,8 @@ func ErrorHandler(c *gin.Context) {
 		logs.ErrorLogger.Error().
 			Str("Method", c.Request.Method).
 			Str("Path", c.Request.URL.Path).
-			Int("Status code", 400).
-			Msgf("Could not unmarshal the request body into the requestBody struct due to: %s", err.Error())
+			Int("Status code", c.Writer.Status()).
+			Msgf("Could not bind the request body to the requestBody struct due to: %s", err.Error())
 	}
 
 	if len(c.Errors) != 0 {

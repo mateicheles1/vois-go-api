@@ -184,6 +184,5 @@ func CreateToDo(c *gin.Context) {
 		Content: requestBody.Content,
 	}
 
-
 	c.Status(201)
 }
