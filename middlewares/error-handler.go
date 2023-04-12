@@ -7,8 +7,9 @@ import (
 )
 
 func ErrorHandler(c *gin.Context) {
-	c.Next()
 
+	c.Next()
+	
 	for _, err := range c.Errors {
 		logs.ErrorLogger.Error().
 			Str("Method", c.Request.Method).

@@ -14,6 +14,7 @@ func SetupRoutes() {
 
 	r.Use(middlewares.ErrorHandler)
 	r.Use(middlewares.InfoHandler())
+	r.Use(gin.Recovery())
 
 	r.GET("api/v2/lists", controllers.Lists)
 	r.GET("api/v2/lists/:listid/todos", controllers.Todos)
