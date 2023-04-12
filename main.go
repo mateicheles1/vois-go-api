@@ -12,5 +12,4 @@ func init() {
 
 func main() {
 	routes.SetupRoutes()
-
 }
