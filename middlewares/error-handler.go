@@ -14,7 +14,7 @@ func ErrorHandler(c *gin.Context) {
 			Str("Method", c.Request.Method).
 			Str("Path", c.Request.URL.Path).
 			Int("Status code", c.Writer.Status()).
-			Msgf("Could not bind the request body to the requestBody struct due to: %s", err.Error())
+			Msgf("Could not bind the request body to desired struct due to: %s", err.Error())
 	}
 
 	if len(c.Errors) != 0 {
