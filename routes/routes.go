@@ -12,7 +12,7 @@ import (
 func SetupRoutes() {
 	r := gin.New()
 
-	r.Use(middlewares.ErrorHandler)
+	r.Use(middlewares.ErrorHandler())
 	r.Use(middlewares.InfoHandler())
 	r.Use(gin.Recovery())
 
