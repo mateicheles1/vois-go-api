@@ -3,7 +3,7 @@ package routes
 import (
 	"gogin-api/controllers"
 	"gogin-api/logs"
-	"gogin-api/middleware"
+	"gogin-api/middlewares"
 
 	"github.com/gin-gonic/gin"
 )
@@ -12,7 +12,8 @@ import (
 func SetupRoutes() {
 	r := gin.New()
 
-	r.Use(middleware.ErrorHandler)
+	r.Use(middlewares.ErrorHandler)
+	r.Use(middlewares.InfoHandler())
 
 	r.GET("api/v2/lists", controllers.Lists)
 	r.GET("api/v2/lists/:listid/todos", controllers.Todos)
@@ -28,6 +29,6 @@ func SetupRoutes() {
 	r.DELETE("api/v2//todos/:todoid", controllers.DeleteToDo)
 
 	if err := r.Run(); err != nil {
-		logs.Logger.Fatal().Msgf("Could not start the server due to: %s", err.Error())
+		logs.ErrorLogger.Fatal().Msgf("Could not start the server due to: %s", err.Error())
 	}
 }

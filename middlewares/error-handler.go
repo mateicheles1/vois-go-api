@@ -1,8 +1,7 @@
-package middleware
+package middlewares
 
 import (
 	"gogin-api/logs"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -11,10 +10,10 @@ func ErrorHandler(c *gin.Context) {
 	c.Next()
 
 	for _, err := range c.Errors {
-		logs.Logger.Error().
+		logs.ErrorLogger.Error().
 			Str("Method", c.Request.Method).
 			Str("Path", c.Request.URL.Path).
-			Int("Status code", http.StatusBadRequest).
+			Int("Status code", 400).
 			Msgf("Could not unmarshal the request body into the requestBody struct due to: %s", err.Error())
 	}
 
