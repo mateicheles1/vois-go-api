@@ -9,7 +9,7 @@ import (
 
 func Lists(c *gin.Context) {
 
-	if len(models.AllData.List) == 0 {
+	if models.AllData.List == nil {
 		c.Status(204)
 	} else {
 		c.JSON(200, models.AllData.GetAllLists())

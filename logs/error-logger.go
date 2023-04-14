@@ -10,10 +10,10 @@ import (
 func errorLogger() zerolog.Logger {
 
 	logFile, err := os.OpenFile(
-        "./logs/log-file.log",
-        os.O_RDWR|os.O_CREATE|os.O_APPEND,
-        0777,
-    )
+		"./logs/log-file.log",
+		os.O_RDWR|os.O_CREATE|os.O_APPEND,
+		0777,
+	)
 	if err != nil {
 		log.Panic().Msgf("Could not open file due to: %s", err.Error())
 	}
@@ -23,4 +23,3 @@ func errorLogger() zerolog.Logger {
 }
 
 var ErrorLogger = errorLogger()
- 
