@@ -12,7 +12,7 @@ func Lists(c *gin.Context) {
 	if models.AllData.List == nil {
 		c.Status(204)
 	} else {
-		c.JSON(200, models.AllData.GetAllLists())
+		c.JSON(200, models.AllData.PrintAllLists())
 	}
 }
 
@@ -21,7 +21,7 @@ func Todos(c *gin.Context) {
 	if list, hasList := models.AllData.List[c.Param("listid")]; !hasList {
 		c.Status(404)
 	} else {
-		c.JSON(200, list.GetTodos())
+		c.JSON(200, list.PrintTodos())
 	}
 }
 

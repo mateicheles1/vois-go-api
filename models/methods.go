@@ -2,13 +2,13 @@ package models
 
 import "github.com/google/uuid"
 
-func (a AppData) GetAllLists() []*ResponseBodyList {
+func (a AppData) PrintAllLists() []*ResponseBodyList {
 	var lists []*ResponseBodyList
 	for _, list := range a.List {
 		responseList := &ResponseBodyList{
 			Id:    list.Id,
 			Owner: list.Owner,
-			Todos: list.GetTodos(),
+			Todos: list.PrintTodos(),
 		}
 		lists = append(lists, responseList)
 	}
@@ -51,7 +51,7 @@ func (l ToDoList) PrintList() ResponseBodyList {
 	}
 }
 
-func (l ToDoList) GetTodos() []ToDo {
+func (l ToDoList) PrintTodos() []ToDo {
 	var todos []ToDo
 	for _, todo := range l.Todos {
 		responseToDo := ToDo{
