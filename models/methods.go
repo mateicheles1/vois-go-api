@@ -2,10 +2,10 @@ package models
 
 import "github.com/google/uuid"
 
-func (a AppData) PrintAllLists() []*ResponseBodyList {
-	var lists []*ResponseBodyList
+func (a AppData) PrintAllLists() []ResponseBodyList {
+	var lists []ResponseBodyList
 	for _, list := range a.List {
-		responseList := &ResponseBodyList{
+		responseList := ResponseBodyList{
 			Id:    list.Id,
 			Owner: list.Owner,
 			Todos: list.PrintTodos(),
