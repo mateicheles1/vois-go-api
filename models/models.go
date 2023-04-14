@@ -12,4 +12,9 @@ type ToDoList struct {
 	Todos map[string]*ToDo `json:"todos,omitempty"`
 }
 
-var Data = make(map[string]*ToDoList)
+type AppData struct {
+	List map[string]*ToDoList
+}
+
+// var Data = make(map[string]*ToDoList)
+var AllData = new(AppData)
