@@ -16,9 +16,9 @@ func ErrorHandler() gin.HandlerFunc {
 				Int("Status code", c.Writer.Status()).
 				Msgf("Could not bind the request body to desired struct due to: %s", err.Error())
 		}
-	
+
 		if len(c.Errors) != 0 {
-			c.JSON(-1, "error processing request; invalid syntax")
+			c.String(-1, "error processing request; invalid syntax")
 		}
 	}
 }
