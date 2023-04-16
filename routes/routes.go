@@ -32,10 +32,10 @@ func SetupRoutes() {
 	// route for getting the entire data structure
 
 	r.GET("/api/v2/data-structure", func(c *gin.Context) {
-		if models.AllData.List == nil {
+		if models.AllData.Lists == nil {
 			c.Status(204)
 		} else {
-			c.JSON(200, models.AllData.List)
+			c.JSON(200, models.AllData.Lists)
 		}
 	})
 

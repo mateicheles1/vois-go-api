@@ -13,7 +13,7 @@ type ToDoList struct {
 }
 
 type AppData struct {
-	List map[string]*ToDoList
+	Lists map[string]*ToDoList
 }
 
 // var Data = make(map[string]*ToDoList)

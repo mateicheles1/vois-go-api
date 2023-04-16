@@ -9,29 +9,32 @@ import (
 
 func Lists(c *gin.Context) {
 
-	if models.AllData.List == nil {
+	if models.AllData.Lists == nil {
 		c.Status(204)
 	} else {
 		c.JSON(200, models.AllData.PrintAllLists())
 	}
+
 }
 
 func Todos(c *gin.Context) {
 
-	if list, hasList := models.AllData.List[c.Param("listid")]; !hasList {
+	if list, hasList := models.AllData.Lists[c.Param("listid")]; !hasList {
 		c.Status(404)
 	} else {
 		c.JSON(200, list.PrintTodos())
 	}
+
 }
 
 func GetList(c *gin.Context) {
 
-	if list, hasList := models.AllData.List[c.Param("listid")]; !hasList {
+	if list, hasList := models.AllData.Lists[c.Param("listid")]; !hasList {
 		c.Status(404)
 	} else {
 		c.JSON(200, list.PrintList())
 	}
+
 }
 
 func CreateList(c *gin.Context) {
@@ -53,13 +56,13 @@ func CreateList(c *gin.Context) {
 	}
 
 	models.AllData.CreateList(requestBody, requestBodyTodos, todoListKey)
-
 	c.Status(201)
+
 }
 
 func PatchList(c *gin.Context) {
 
-	if _, hasList := models.AllData.List[c.Param("listid")]; !hasList {
+	if _, hasList := models.AllData.Lists[c.Param("listid")]; !hasList {
 		c.Status(404)
 		return
 	}
@@ -70,14 +73,13 @@ func PatchList(c *gin.Context) {
 		return
 	}
 
-	models.AllData.List[c.Param("listid")].PatchList(requestBody.Owner)
-
+	models.AllData.Lists[c.Param("listid")].PatchList(requestBody.Owner)
 	c.Status(200)
 }
 
 func DeleteList(c *gin.Context) {
 
-	if _, hasList := models.AllData.List[c.Param("listid")]; !hasList {
+	if _, hasList := models.AllData.Lists[c.Param("listid")]; !hasList {
 		c.Status(404)
 	} else {
 		models.AllData.DeleteList(c.Param("listid"))
@@ -87,7 +89,7 @@ func DeleteList(c *gin.Context) {
 
 func GetToDo(c *gin.Context) {
 
-	for _, list := range models.AllData.List {
+	for _, list := range models.AllData.Lists {
 		if todo, hasToDo := list.Todos[c.Param("todoid")]; !hasToDo {
 			c.Status(404)
 		} else {
@@ -100,11 +102,11 @@ func GetToDo(c *gin.Context) {
 
 func DeleteToDo(c *gin.Context) {
 
-	for k, list := range models.AllData.List {
+	for k, list := range models.AllData.Lists {
 		if _, hasToDo := list.Todos[c.Param("todoid")]; !hasToDo {
 			c.Status(404)
 		} else {
-			models.AllData.List[k].DeleteToDo(c.Param("todoid"))
+			models.AllData.Lists[k].DeleteToDo(c.Param("todoid"))
 			break
 		}
 	}
@@ -118,22 +120,21 @@ func PatchToDo(c *gin.Context) {
 		return
 	}
 
-	for k, list := range models.AllData.List {
+	for k, list := range models.AllData.Lists {
 		if _, hasToDo := list.Todos[c.Param("todoid")]; !hasToDo {
 			c.Status(404)
 			return
 		} else {
-			models.AllData.List[k].Todos[c.Param("todoid")].PatchToDo(requestBody.Content)
+			models.AllData.Lists[k].Todos[c.Param("todoid")].PatchToDo(requestBody.Content)
 			c.Status(200)
 			break
 		}
 	}
-
 }
 
 func CreateToDo(c *gin.Context) {
 
-	if _, hasList := models.AllData.List[c.Param("listid")]; !hasList {
+	if _, hasList := models.AllData.Lists[c.Param("listid")]; !hasList {
 		c.Status(404)
 		return
 	}
@@ -144,6 +145,6 @@ func CreateToDo(c *gin.Context) {
 		return
 	}
 
-	models.AllData.List[c.Param("listid")].CreateToDo(requestBody)
+	models.AllData.Lists[c.Param("listid")].CreateToDo(requestBody)
 	c.Status(201)
 }

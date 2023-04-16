@@ -4,7 +4,7 @@ import "github.com/google/uuid"
 
 func (a AppData) PrintAllLists() []ResponseBodyList {
 	var lists []ResponseBodyList
-	for _, list := range a.List {
+	for _, list := range a.Lists {
 		responseList := ResponseBodyList{
 			Id:    list.Id,
 			Owner: list.Owner,
@@ -16,15 +16,15 @@ func (a AppData) PrintAllLists() []ResponseBodyList {
 }
 
 func (a *AppData) CreateList(requestbody *RequestBodyList, todos map[string]*ToDo, key string) {
-	if len(a.List) == 0 {
-		a.List = make(map[string]*ToDoList)
-		a.List[key] = &ToDoList{
+	if a.Lists == nil {
+		a.Lists = make(map[string]*ToDoList)
+		a.Lists[key] = &ToDoList{
 			Id:    key,
 			Owner: requestbody.Owner,
 			Todos: todos,
 		}
 	} else {
-		a.List[key] = &ToDoList{
+		a.Lists[key] = &ToDoList{
 			Id:    key,
 			Owner: requestbody.Owner,
 			Todos: todos,
@@ -33,7 +33,7 @@ func (a *AppData) CreateList(requestbody *RequestBodyList, todos map[string]*ToD
 }
 
 func (a *AppData) DeleteList(key string) {
-	delete(a.List, key)
+	delete(a.Lists, key)
 }
 
 func (l ToDoList) PrintList() ResponseBodyList {
