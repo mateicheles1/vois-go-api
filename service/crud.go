@@ -16,24 +16,43 @@ var Repo = new(ToDoListRepo)
 func (r *ToDoListRepo) CreateList(reqBody *models.RequestBodyList) {
 	if r.Lists == nil {
 		r.Lists = make(map[string]*models.ToDoList)
-	}
-	listKey := uuid.New().String()
+		listKey := uuid.New().String()
 
-	todos := make(map[string]*models.ToDo)
+		todos := make(map[string]*models.ToDo)
 
-	for _, v := range reqBody.Todos {
-		toDosKey := uuid.New().String()
-		todos[toDosKey] = &models.ToDo{
-			Id:      toDosKey,
-			ListId:  listKey,
-			Content: v,
+		for _, v := range reqBody.Todos {
+			toDosKey := uuid.New().String()
+			todos[toDosKey] = &models.ToDo{
+				Id:      toDosKey,
+				ListId:  listKey,
+				Content: v,
+			}
 		}
-	}
 
-	r.Lists[listKey] = &models.ToDoList{
-		Id:    listKey,
-		Owner: reqBody.Owner,
-		Todos: todos,
+		r.Lists[listKey] = &models.ToDoList{
+			Id:    listKey,
+			Owner: reqBody.Owner,
+			Todos: todos,
+		}
+	} else {
+		listKey := uuid.New().String()
+
+		todos := make(map[string]*models.ToDo)
+
+		for _, v := range reqBody.Todos {
+			toDosKey := uuid.New().String()
+			todos[toDosKey] = &models.ToDo{
+				Id:      toDosKey,
+				ListId:  listKey,
+				Content: v,
+			}
+		}
+
+		r.Lists[listKey] = &models.ToDoList{
+			Id:    listKey,
+			Owner: reqBody.Owner,
+			Todos: todos,
+		}
 	}
 }
 
@@ -77,9 +96,8 @@ func (r ToDoListRepo) GetAllLists() ([]models.ResponseBodyList, error) {
 			Todos: todos,
 		}
 		lists = append(lists, responseList)
-		return lists, nil
 	}
-	return nil, errors.New("no content")
+	return lists, nil
 }
 
 func (r *ToDoListRepo) CreateToDoInList(listId string, content string) error {
@@ -106,9 +124,12 @@ func (r *ToDoListRepo) PatchToDoInList(content string, id string) error {
 }
 
 func (r *ToDoListRepo) GetToDoInList(key string) (*models.ToDo, error) {
-	for k, list := range r.Lists {
-		if _, hasToDo := list.Todos[key]; hasToDo {
-			return r.Lists[k].Todos[key], nil
+	for _, list := range r.Lists {
+		if todo, hasToDo := list.Todos[key]; hasToDo {
+			return &models.ToDo{
+				ListId:  list.Id,
+				Content: todo.Content,
+			}, nil
 		}
 	}
 	return nil, errors.New("todo not found")

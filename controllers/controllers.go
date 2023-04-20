@@ -65,6 +65,8 @@ func PatchList(c *gin.Context) {
 		return
 	}
 
+	requestBody.Id = c.Param("listid")
+
 	err := service.Repo.PatchList(requestBody)
 
 	if err != nil {
