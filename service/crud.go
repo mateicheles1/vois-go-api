@@ -16,43 +16,24 @@ var Repo = new(ToDoListRepo)
 func (r *ToDoListRepo) CreateList(reqBody *models.RequestBodyList) {
 	if r.Lists == nil {
 		r.Lists = make(map[string]*models.ToDoList)
-		listKey := uuid.New().String()
+	}
+	listKey := uuid.New().String()
 
-		todos := make(map[string]*models.ToDo)
+	todos := make(map[string]*models.ToDo)
 
-		for _, v := range reqBody.Todos {
-			toDosKey := uuid.New().String()
-			todos[toDosKey] = &models.ToDo{
-				Id:      toDosKey,
-				ListId:  listKey,
-				Content: v,
-			}
+	for _, v := range reqBody.Todos {
+		toDosKey := uuid.New().String()
+		todos[toDosKey] = &models.ToDo{
+			Id:      toDosKey,
+			ListId:  listKey,
+			Content: v,
 		}
+	}
 
-		r.Lists[listKey] = &models.ToDoList{
-			Id:    listKey,
-			Owner: reqBody.Owner,
-			Todos: todos,
-		}
-	} else {
-		listKey := uuid.New().String()
-
-		todos := make(map[string]*models.ToDo)
-
-		for _, v := range reqBody.Todos {
-			toDosKey := uuid.New().String()
-			todos[toDosKey] = &models.ToDo{
-				Id:      toDosKey,
-				ListId:  listKey,
-				Content: v,
-			}
-		}
-
-		r.Lists[listKey] = &models.ToDoList{
-			Id:    listKey,
-			Owner: reqBody.Owner,
-			Todos: todos,
-		}
+	r.Lists[listKey] = &models.ToDoList{
+		Id:    listKey,
+		Owner: reqBody.Owner,
+		Todos: todos,
 	}
 }
 
