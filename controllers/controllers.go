@@ -2,70 +2,62 @@ package controllers
 
 import (
 	"gogin-api/models"
+	"gogin-api/service"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 func Lists(c *gin.Context) {
 
-	if models.AllData.Lists == nil {
+	lists, err := service.Repo.GetAllLists()
+	if err != nil {
 		c.Status(204)
-	} else {
-		c.JSON(200, models.AllData.PrintAllLists())
+		return
 	}
+	c.JSON(200, lists)
 
 }
 
 func Todos(c *gin.Context) {
 
-	if list, hasList := models.AllData.Lists[c.Param("listid")]; !hasList {
+	todos, err := service.Repo.GetAllToDosInList(c.Param("listid"))
+
+	if err != nil {
 		c.Status(404)
-	} else {
-		c.JSON(200, list.PrintTodos())
+		return
 	}
+
+	c.JSON(200, todos)
 
 }
 
 func GetList(c *gin.Context) {
 
-	if list, hasList := models.AllData.Lists[c.Param("listid")]; !hasList {
+	list, err := service.Repo.GetList(c.Param("listid"))
+
+	if err != nil {
 		c.Status(404)
-	} else {
-		c.JSON(200, list.PrintList())
+		return
 	}
+
+	c.JSON(200, list)
 
 }
 
 func CreateList(c *gin.Context) {
 	requestBody := new(models.RequestBodyList)
-	requestBodyTodos := make(map[string]*models.ToDo)
-	todoListKey := uuid.New().String()
 
 	if err := c.BindJSON(requestBody); err != nil {
 		return
 	}
 
-	for _, v := range requestBody.Todos {
-		toDosKey := uuid.New().String()
-		requestBodyTodos[toDosKey] = &models.ToDo{
-			Id:      toDosKey,
-			ListId:  todoListKey,
-			Content: v,
-		}
-	}
+	service.Repo.CreateList(requestBody)
 
-	models.AllData.CreateList(requestBody, requestBodyTodos, todoListKey)
 	c.Status(201)
 
 }
 
 func PatchList(c *gin.Context) {
-
-	if _, hasList := models.AllData.Lists[c.Param("listid")]; !hasList {
-		c.Status(404)
-		return
-	}
 
 	requestBody := new(models.ToDoList)
 
@@ -73,43 +65,53 @@ func PatchList(c *gin.Context) {
 		return
 	}
 
-	models.AllData.Lists[c.Param("listid")].PatchList(requestBody.Owner)
+	err := service.Repo.PatchList(requestBody)
+
+	if err != nil {
+		c.Status(404)
+		return
+	}
+
 	c.Status(200)
+
 }
 
 func DeleteList(c *gin.Context) {
 
-	if _, hasList := models.AllData.Lists[c.Param("listid")]; !hasList {
+	err := service.Repo.DeleteList(c.Param("listid"))
+
+	if err != nil {
 		c.Status(404)
-	} else {
-		models.AllData.DeleteList(c.Param("listid"))
+		return
 	}
+
+	c.Status(200)
 
 }
 
 func GetToDo(c *gin.Context) {
 
-	for _, list := range models.AllData.Lists {
-		if todo, hasToDo := list.Todos[c.Param("todoid")]; !hasToDo {
-			c.Status(404)
-		} else {
-			c.JSON(200, todo.PrintToDo())
-			break
-		}
+	todo, err := service.Repo.GetToDoInList(c.Param("todoid"))
+
+	if err != nil {
+		c.Status(404)
+		return
 	}
+
+	c.JSON(200, todo)
 
 }
 
 func DeleteToDo(c *gin.Context) {
 
-	for k, list := range models.AllData.Lists {
-		if _, hasToDo := list.Todos[c.Param("todoid")]; !hasToDo {
-			c.Status(404)
-		} else {
-			models.AllData.Lists[k].DeleteToDo(c.Param("todoid"))
-			break
-		}
+	err := service.Repo.DeleteToDoInList(c.Param("todoid"))
+
+	if err != nil {
+		c.Status(404)
+		return
 	}
+
+	c.Status(200)
 
 }
 
@@ -120,24 +122,17 @@ func PatchToDo(c *gin.Context) {
 		return
 	}
 
-	for k, list := range models.AllData.Lists {
-		if _, hasToDo := list.Todos[c.Param("todoid")]; !hasToDo {
-			c.Status(404)
-			return
-		} else {
-			models.AllData.Lists[k].Todos[c.Param("todoid")].PatchToDo(requestBody.Content)
-			c.Status(200)
-			break
-		}
-	}
-}
+	err := service.Repo.PatchToDoInList(requestBody.Content, c.Param("todoid"))
 
-func CreateToDo(c *gin.Context) {
-
-	if _, hasList := models.AllData.Lists[c.Param("listid")]; !hasList {
+	if err != nil {
 		c.Status(404)
 		return
 	}
+
+	c.Status(200)
+}
+
+func CreateToDo(c *gin.Context) {
 
 	requestBody := new(models.ToDo)
 
@@ -145,6 +140,12 @@ func CreateToDo(c *gin.Context) {
 		return
 	}
 
-	models.AllData.Lists[c.Param("listid")].CreateToDo(requestBody)
+	err := service.Repo.CreateToDoInList(c.Param("listid"), requestBody.Content)
+
+	if err != nil {
+		c.Status(404)
+		return
+	}
+
 	c.Status(201)
 }

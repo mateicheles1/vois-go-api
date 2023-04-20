@@ -11,10 +11,3 @@ type ToDoList struct {
 	Owner string           `json:"owner" binding:"required"`
 	Todos map[string]*ToDo `json:"todos,omitempty"`
 }
-
-type AppData struct {
-	Lists map[string]*ToDoList
-}
-
-// var Data = make(map[string]*ToDoList)
-var AllData = new(AppData)

@@ -4,7 +4,7 @@ import (
 	"gogin-api/controllers"
 	"gogin-api/logs"
 	"gogin-api/middlewares"
-	"gogin-api/models"
+	"gogin-api/service"
 
 	"github.com/gin-gonic/gin"
 )
@@ -32,10 +32,10 @@ func SetupRoutes() {
 	// route for getting the entire data structure
 
 	r.GET("/api/v2/data-structure", func(c *gin.Context) {
-		if models.AllData.Lists == nil {
+		if service.Repo.Lists == nil {
 			c.Status(204)
 		} else {
-			c.JSON(200, models.AllData.Lists)
+			c.JSON(200, service.Repo.Lists)
 		}
 	})
 
