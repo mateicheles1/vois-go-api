@@ -11,8 +11,6 @@ type ToDoListRepo struct {
 	Lists map[string]*models.ToDoList
 }
 
-var Repo = new(ToDoListRepo)
-
 func (r *ToDoListRepo) CreateList(reqBody *models.RequestBodyList) {
 	if r.Lists == nil {
 		r.Lists = make(map[string]*models.ToDoList)
@@ -77,6 +75,9 @@ func (r ToDoListRepo) GetAllLists() ([]models.ResponseBodyList, error) {
 			Todos: todos,
 		}
 		lists = append(lists, responseList)
+	}
+	if len(lists) == 0 {
+		return nil, errors.New("no content")
 	}
 	return lists, nil
 }

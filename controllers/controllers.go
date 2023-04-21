@@ -2,152 +2,181 @@ package controllers
 
 import (
 	"gogin-api/models"
-	"gogin-api/service"
 
 	"github.com/gin-gonic/gin"
 )
 
-func Lists(c *gin.Context) {
-
-	lists, err := service.Repo.GetAllLists()
-	if err != nil {
-		c.Status(204)
-		return
+func GetAllListsHandler(todoListService models.ToDoListService) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		lists, err := todoListService.GetAllLists()
+		if err != nil {
+			c.Status(204)
+			return
+		}
+		c.JSON(200, lists)
 	}
-	c.JSON(200, lists)
 
 }
 
-func Todos(c *gin.Context) {
+func GetAllTodosHandler(todoListService models.ToDoListService) gin.HandlerFunc {
+	return func(c *gin.Context) {
 
-	todos, err := service.Repo.GetAllToDosInList(c.Param("listid"))
+		todos, err := todoListService.GetAllToDosInList(c.Param("listid"))
 
-	if err != nil {
-		c.Status(404)
-		return
+		if err != nil {
+			c.Status(404)
+			return
+		}
+
+		c.JSON(200, todos)
 	}
-
-	c.JSON(200, todos)
 
 }
 
-func GetList(c *gin.Context) {
+func GetListHandler(todoListService models.ToDoListService) gin.HandlerFunc {
 
-	list, err := service.Repo.GetList(c.Param("listid"))
+	return func(c *gin.Context) {
 
-	if err != nil {
-		c.Status(404)
-		return
+		list, err := todoListService.GetList(c.Param("listid"))
+
+		if err != nil {
+			c.Status(404)
+			return
+		}
+
+		c.JSON(200, list)
 	}
-
-	c.JSON(200, list)
 
 }
 
-func CreateList(c *gin.Context) {
-	requestBody := new(models.RequestBodyList)
+func CreateListHandler(todoListService models.ToDoListService) gin.HandlerFunc {
 
-	if err := c.BindJSON(requestBody); err != nil {
-		return
+	return func(c *gin.Context) {
+
+		requestBody := new(models.RequestBodyList)
+
+		if err := c.BindJSON(requestBody); err != nil {
+			return
+		}
+
+		todoListService.CreateList(requestBody)
+
+		c.Status(201)
 	}
-
-	service.Repo.CreateList(requestBody)
-
-	c.Status(201)
 
 }
 
-func PatchList(c *gin.Context) {
+func PatchListHandler(todoListService models.ToDoListService) gin.HandlerFunc {
 
-	requestBody := new(models.ToDoList)
+	return func(c *gin.Context) {
 
-	if err := c.BindJSON(requestBody); err != nil {
-		return
+		requestBody := new(models.ToDoList)
+
+		if err := c.BindJSON(requestBody); err != nil {
+			return
+		}
+
+		requestBody.Id = c.Param("listid")
+
+		err := todoListService.PatchList(requestBody)
+
+		if err != nil {
+			c.Status(404)
+			return
+		}
+
+		c.Status(200)
 	}
-
-	requestBody.Id = c.Param("listid")
-
-	err := service.Repo.PatchList(requestBody)
-
-	if err != nil {
-		c.Status(404)
-		return
-	}
-
-	c.Status(200)
 
 }
 
-func DeleteList(c *gin.Context) {
+func DeleteListHandler(todoListService models.ToDoListService) gin.HandlerFunc {
 
-	err := service.Repo.DeleteList(c.Param("listid"))
+	return func(c *gin.Context) {
 
-	if err != nil {
-		c.Status(404)
-		return
+		err := todoListService.DeleteList(c.Param("listid"))
+
+		if err != nil {
+			c.Status(404)
+			return
+		}
+
+		c.Status(200)
 	}
-
-	c.Status(200)
 
 }
 
-func GetToDo(c *gin.Context) {
+func GetToDoHandler(todoListService models.ToDoListService) gin.HandlerFunc {
 
-	todo, err := service.Repo.GetToDoInList(c.Param("todoid"))
+	return func(c *gin.Context) {
 
-	if err != nil {
-		c.Status(404)
-		return
+		todo, err := todoListService.GetToDoInList(c.Param("todoid"))
+
+		if err != nil {
+			c.Status(404)
+			return
+		}
+
+		c.JSON(200, todo)
 	}
-
-	c.JSON(200, todo)
 
 }
 
-func DeleteToDo(c *gin.Context) {
+func DeleteToDoHandler(todoListService models.ToDoListService) gin.HandlerFunc {
 
-	err := service.Repo.DeleteToDoInList(c.Param("todoid"))
+	return func(c *gin.Context) {
 
-	if err != nil {
-		c.Status(404)
-		return
+		err := todoListService.DeleteToDoInList(c.Param("todoid"))
+
+		if err != nil {
+			c.Status(404)
+			return
+		}
+
+		c.Status(200)
 	}
-
-	c.Status(200)
 
 }
 
-func PatchToDo(c *gin.Context) {
-	requestBody := new(models.ToDo)
+func PatchToDoHandler(todoListService models.ToDoListService) gin.HandlerFunc {
 
-	if err := c.BindJSON(requestBody); err != nil {
-		return
+	return func(c *gin.Context) {
+
+		requestBody := new(models.ToDo)
+
+		if err := c.BindJSON(requestBody); err != nil {
+			return
+		}
+
+		err := todoListService.PatchToDoInList(requestBody.Content, c.Param("todoid"))
+
+		if err != nil {
+			c.Status(404)
+			return
+		}
+
+		c.Status(200)
 	}
-
-	err := service.Repo.PatchToDoInList(requestBody.Content, c.Param("todoid"))
-
-	if err != nil {
-		c.Status(404)
-		return
-	}
-
-	c.Status(200)
 }
 
-func CreateToDo(c *gin.Context) {
+func CreateToDoHandler(todoListService models.ToDoListService) gin.HandlerFunc {
 
-	requestBody := new(models.ToDo)
+	return func(c *gin.Context) {
 
-	if err := c.BindJSON(requestBody); err != nil {
-		return
+		requestBody := new(models.ToDo)
+
+		if err := c.BindJSON(requestBody); err != nil {
+			return
+		}
+
+		err := todoListService.CreateToDoInList(c.Param("listid"), requestBody.Content)
+
+		if err != nil {
+			c.Status(404)
+			return
+		}
+
+		c.Status(201)
 	}
 
-	err := service.Repo.CreateToDoInList(c.Param("listid"), requestBody.Content)
-
-	if err != nil {
-		c.Status(404)
-		return
-	}
-
-	c.Status(201)
 }

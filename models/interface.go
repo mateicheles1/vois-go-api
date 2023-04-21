@@ -1,7 +1,7 @@
 package models
 
 type ToDoListService interface {
-	CreateList(reqBody *RequestBodyList, todos map[string]*ToDo, key string)
+	CreateList(reqBody *RequestBodyList)
 	PatchList(list *ToDoList) error
 	GetList(id string) (ResponseBodyList, error)
 	DeleteList(key string) error
