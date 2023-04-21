@@ -10,14 +10,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func newToDoListRepo() models.ToDoListService {
+func newToDoListService() models.ToDoListService {
 	return &service.ToDoListRepo{}
 }
 
 func SetupRoutes() {
 	r := gin.New()
 
-	repo := newToDoListRepo()
+	repo := newToDoListService()
 
 	r.Use(middlewares.ErrorHandler())
 	r.Use(middlewares.InfoHandler())
@@ -38,13 +38,13 @@ func SetupRoutes() {
 
 	// route for getting the entire data structure
 
-	// r.GET("/api/v2/data-structure", func(c *gin.Context) {
-	// 	if service.Repo == nil {
-	// 		c.Status(204)
-	// 	} else {
-	// 		c.JSON(200, service.Repo)
-	// 	}
-	// })
+	r.GET("/api/v2/data-structure", func(c *gin.Context) {
+		if repo == nil {
+			c.Status(204)
+		} else {
+			c.JSON(200, repo)
+		}
+	})
 
 	if err := r.Run(); err != nil {
 		logs.ErrorLogger.Fatal().Msgf("Could not start the server due to: %s", err.Error())

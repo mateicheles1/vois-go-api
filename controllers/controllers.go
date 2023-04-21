@@ -148,7 +148,7 @@ func PatchToDoHandler(todoListService models.ToDoListService) gin.HandlerFunc {
 			return
 		}
 
-		err := todoListService.PatchToDoInList(requestBody.Content, c.Param("todoid"))
+		err := todoListService.PatchToDoInList(requestBody.Completed, c.Param("todoid"))
 
 		if err != nil {
 			c.Status(404)
@@ -168,7 +168,10 @@ func CreateToDoHandler(todoListService models.ToDoListService) gin.HandlerFunc {
 		if err := c.BindJSON(requestBody); err != nil {
 			return
 		}
-
+		if requestBody.Content == "" {
+			c.String(400, "content can't be empty")
+			return
+		}
 		err := todoListService.CreateToDoInList(c.Param("listid"), requestBody.Content)
 
 		if err != nil {

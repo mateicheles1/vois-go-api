@@ -22,9 +22,10 @@ func (r *ToDoListRepo) CreateList(reqBody *models.RequestBodyList) {
 	for _, v := range reqBody.Todos {
 		toDosKey := uuid.New().String()
 		todos[toDosKey] = &models.ToDo{
-			Id:      toDosKey,
-			ListId:  listKey,
-			Content: v,
+			Id:        toDosKey,
+			ListId:    listKey,
+			Content:   v,
+			Completed: false,
 		}
 	}
 
@@ -86,19 +87,20 @@ func (r *ToDoListRepo) CreateToDoInList(listId string, content string) error {
 	if _, hasList := r.Lists[listId]; hasList {
 		key := uuid.New().String()
 		r.Lists[listId].Todos[key] = &models.ToDo{
-			Id:      key,
-			ListId:  listId,
-			Content: content,
+			Id:        key,
+			ListId:    listId,
+			Content:   content,
+			Completed: false,
 		}
 		return nil
 	}
 	return errors.New("list not found")
 }
 
-func (r *ToDoListRepo) PatchToDoInList(content string, id string) error {
+func (r *ToDoListRepo) PatchToDoInList(completed bool, id string) error {
 	for k, list := range r.Lists {
 		if _, hasTodo := list.Todos[id]; hasTodo {
-			r.Lists[k].Todos[id].Content = content
+			r.Lists[k].Todos[id].Completed = completed
 			return nil
 		}
 	}
@@ -109,8 +111,9 @@ func (r *ToDoListRepo) GetToDoInList(key string) (*models.ToDo, error) {
 	for _, list := range r.Lists {
 		if todo, hasToDo := list.Todos[key]; hasToDo {
 			return &models.ToDo{
-				ListId:  list.Id,
-				Content: todo.Content,
+				ListId:    list.Id,
+				Content:   todo.Content,
+				Completed: todo.Completed,
 			}, nil
 		}
 	}
@@ -131,8 +134,9 @@ func (r *ToDoListRepo) GetAllToDosInList(listId string) ([]models.ToDo, error) {
 		var todos []models.ToDo
 		for _, todo := range r.Lists[listId].Todos {
 			responseToDo := &models.ToDo{
-				Id:      todo.Id,
-				Content: todo.Content,
+				Id:        todo.Id,
+				Content:   todo.Content,
+				Completed: todo.Completed,
 			}
 			todos = append(todos, *responseToDo)
 		}
