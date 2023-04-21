@@ -9,7 +9,7 @@ import (
 )
 
 type Handler struct {
-	Service service.ToDoListService
+	Service service.ToDoListServiceInterface
 }
 
 func (h Handler) GetAllListsHandler(c *gin.Context) {
@@ -125,9 +125,7 @@ func (h *Handler) CreateToDoHandler(c *gin.Context) {
 		c.String(http.StatusBadRequest, "content can't be empty")
 		return
 	}
-	err := h.Service.CreateToDoInList(c.Param("listid"), requestBody.Content)
-
-	if err != nil {
+	if err := h.Service.CreateToDoInList(c.Param("listid"), requestBody.Content); err != nil {
 		c.Status(http.StatusNotFound)
 		return
 	}

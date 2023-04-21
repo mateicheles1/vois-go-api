@@ -11,9 +11,11 @@ import (
 )
 
 func newHandler() controllers.Handler {
-	return controllers.Handler{
-		Service: &service.ToDoListRepo{},
+	todoListRepo := new(service.ToDoListService)
+	handler := controllers.Handler{
+		Service: todoListRepo,
 	}
+	return handler
 }
 
 func SetupRoutes() {

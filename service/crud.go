@@ -2,18 +2,19 @@ package service
 
 import (
 	"errors"
+	"gogin-api/data"
 	"gogin-api/models"
 
 	"github.com/google/uuid"
 )
 
-type ToDoListRepo struct {
-	Lists map[string]*models.ToDoList
+type ToDoListService struct {
+	repo data.ToDoListRepo
 }
 
-func (r *ToDoListRepo) CreateList(reqBody *models.RequestBodyList) {
-	if r.Lists == nil {
-		r.Lists = make(map[string]*models.ToDoList)
+func (r *ToDoListService) CreateList(reqBody *models.RequestBodyList) {
+	if r.repo.Lists == nil {
+		r.repo.Lists = make(map[string]*models.ToDoList)
 	}
 	listKey := uuid.New().String()
 
@@ -29,24 +30,24 @@ func (r *ToDoListRepo) CreateList(reqBody *models.RequestBodyList) {
 		}
 	}
 
-	r.Lists[listKey] = &models.ToDoList{
+	r.repo.Lists[listKey] = &models.ToDoList{
 		Id:    listKey,
 		Owner: reqBody.Owner,
 		Todos: todos,
 	}
 }
 
-func (r *ToDoListRepo) PatchList(list *models.ToDoList) error {
-	if _, hasList := r.Lists[list.Id]; hasList {
-		r.Lists[list.Id].Owner = list.Owner
+func (r *ToDoListService) PatchList(list *models.ToDoList) error {
+	if _, hasList := r.repo.Lists[list.Id]; hasList {
+		r.repo.Lists[list.Id].Owner = list.Owner
 		return nil
 	} else {
 		return errors.New("list not found")
 	}
 }
 
-func (r ToDoListRepo) GetList(id string) (models.ResponseBodyList, error) {
-	if list, hasList := r.Lists[id]; hasList {
+func (r ToDoListService) GetList(id string) (models.ResponseBodyList, error) {
+	if list, hasList := r.repo.Lists[id]; hasList {
 		todos, _ := r.GetAllToDosInList(id)
 
 		return models.ResponseBodyList{
@@ -57,18 +58,18 @@ func (r ToDoListRepo) GetList(id string) (models.ResponseBodyList, error) {
 	return models.ResponseBodyList{}, errors.New("list not found")
 }
 
-func (r *ToDoListRepo) DeleteList(key string) error {
-	if _, hasList := r.Lists[key]; hasList {
-		delete(r.Lists, key)
+func (r *ToDoListService) DeleteList(key string) error {
+	if _, hasList := r.repo.Lists[key]; hasList {
+		delete(r.repo.Lists, key)
 		return nil
 	}
 	return errors.New("list not found")
 }
 
-func (r ToDoListRepo) GetAllLists() ([]models.ResponseBodyList, error) {
+func (r ToDoListService) GetAllLists() ([]models.ResponseBodyList, error) {
 	var lists []models.ResponseBodyList
 
-	for _, list := range r.Lists {
+	for _, list := range r.repo.Lists {
 		todos, _ := r.GetAllToDosInList(list.Id)
 		responseList := models.ResponseBodyList{
 			Id:    list.Id,
@@ -83,10 +84,10 @@ func (r ToDoListRepo) GetAllLists() ([]models.ResponseBodyList, error) {
 	return lists, nil
 }
 
-func (r *ToDoListRepo) CreateToDoInList(listId string, content string) error {
-	if _, hasList := r.Lists[listId]; hasList {
+func (r *ToDoListService) CreateToDoInList(listId string, content string) error {
+	if _, hasList := r.repo.Lists[listId]; hasList {
 		key := uuid.New().String()
-		r.Lists[listId].Todos[key] = &models.ToDo{
+		r.repo.Lists[listId].Todos[key] = &models.ToDo{
 			Id:        key,
 			ListId:    listId,
 			Content:   content,
@@ -97,18 +98,18 @@ func (r *ToDoListRepo) CreateToDoInList(listId string, content string) error {
 	return errors.New("list not found")
 }
 
-func (r *ToDoListRepo) PatchToDoInList(completed bool, id string) error {
-	for k, list := range r.Lists {
+func (r *ToDoListService) PatchToDoInList(completed bool, id string) error {
+	for k, list := range r.repo.Lists {
 		if _, hasTodo := list.Todos[id]; hasTodo {
-			r.Lists[k].Todos[id].Completed = completed
+			r.repo.Lists[k].Todos[id].Completed = completed
 			return nil
 		}
 	}
 	return errors.New("tood not found")
 }
 
-func (r *ToDoListRepo) GetToDoInList(key string) (*models.ToDo, error) {
-	for _, list := range r.Lists {
+func (r *ToDoListService) GetToDoInList(key string) (*models.ToDo, error) {
+	for _, list := range r.repo.Lists {
 		if todo, hasToDo := list.Todos[key]; hasToDo {
 			return &models.ToDo{
 				ListId:    list.Id,
@@ -119,20 +120,20 @@ func (r *ToDoListRepo) GetToDoInList(key string) (*models.ToDo, error) {
 	}
 	return nil, errors.New("todo not found")
 }
-func (r *ToDoListRepo) DeleteToDoInList(key string) error {
-	for k, list := range r.Lists {
+func (r *ToDoListService) DeleteToDoInList(key string) error {
+	for k, list := range r.repo.Lists {
 		if _, hasToDo := list.Todos[key]; hasToDo {
-			delete(r.Lists[k].Todos, key)
+			delete(r.repo.Lists[k].Todos, key)
 			return nil
 		}
 	}
 	return errors.New("todo not found")
 }
 
-func (r *ToDoListRepo) GetAllToDosInList(listId string) ([]models.ToDo, error) {
-	if _, hasList := r.Lists[listId]; hasList {
+func (r *ToDoListService) GetAllToDosInList(listId string) ([]models.ToDo, error) {
+	if _, hasList := r.repo.Lists[listId]; hasList {
 		var todos []models.ToDo
-		for _, todo := range r.Lists[listId].Todos {
+		for _, todo := range r.repo.Lists[listId].Todos {
 			responseToDo := &models.ToDo{
 				Id:        todo.Id,
 				Content:   todo.Content,

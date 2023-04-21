@@ -2,7 +2,7 @@ package service
 
 import "gogin-api/models"
 
-type ToDoListService interface {
+type ToDoListServiceInterface interface {
 	CreateList(reqBody *models.RequestBodyList)
 	PatchList(list *models.ToDoList) error
 	GetList(id string) (models.ResponseBodyList, error)
