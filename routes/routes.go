@@ -9,39 +9,41 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func newToDoListService() service.ToDoListService {
-	return &service.ToDoListRepo{}
+func newHandler() *controllers.Handler {
+	return &controllers.Handler{
+		TodoListService: &service.ToDoListRepo{},
+	}
 }
 
 func SetupRoutes() {
 	r := gin.New()
 
-	repo := newToDoListService()
+	handler := newHandler()
 
 	r.Use(middlewares.ErrorHandler())
 	r.Use(middlewares.InfoHandler())
 	r.Use(gin.Recovery())
 
-	r.GET("api/v2/lists", controllers.GetAllListsHandler(repo))
-	r.GET("api/v2/lists/:listid/todos", controllers.GetAllTodosHandler(repo))
+	r.GET("api/v2/lists", handler.GetAllListsHandler)
+	r.GET("api/v2/lists/:listid/todos", handler.GetAllToDosHandler)
 
-	r.GET("/api/v2/lists/:listid", controllers.GetListHandler(repo))
-	r.POST("/api/v2/lists", controllers.CreateListHandler(repo))
-	r.PATCH("api/v2/lists/:listid", controllers.PatchListHandler(repo))
-	r.DELETE("api/v2/lists/:listid", controllers.DeleteListHandler(repo))
+	r.GET("/api/v2/lists/:listid", handler.GetListHandler)
+	r.POST("/api/v2/lists", handler.CreateListHandler)
+	r.PATCH("api/v2/lists/:listid", handler.PatchListHandler)
+	r.DELETE("api/v2/lists/:listid", handler.DeleteListHandler)
 
-	r.GET("api/v2/todos/:todoid", controllers.GetToDoHandler(repo))
-	r.POST("api/v2/lists/:listid/todos", controllers.CreateToDoHandler(repo))
-	r.PATCH("/api/v2/todos/:todoid", controllers.PatchToDoHandler(repo))
-	r.DELETE("api/v2//todos/:todoid", controllers.DeleteToDoHandler(repo))
+	r.GET("api/v2/todos/:todoid", handler.GetToDoHandler)
+	r.POST("api/v2/lists/:listid/todos", handler.CreateToDoHandler)
+	r.PATCH("/api/v2/todos/:todoid", handler.PatchToDoHandler)
+	r.DELETE("api/v2//todos/:todoid", handler.DeleteToDoHandler)
 
 	// route for getting the entire data structure
 
 	r.GET("/api/v2/data-structure", func(c *gin.Context) {
-		if repo == nil {
+		if handler == nil {
 			c.Status(204)
 		} else {
-			c.JSON(200, repo)
+			c.JSON(200, handler)
 		}
 	})
 

@@ -8,180 +8,318 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetAllListsHandler(todoListService service.ToDoListService) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		lists, err := todoListService.GetAllLists()
-		if err != nil {
-			c.Status(204)
-			return
-		}
-		c.JSON(http.StatusOK, lists)
-	}
-
+type Handler struct {
+	TodoListService service.ToDoListService
 }
 
-func GetAllTodosHandler(todoListService service.ToDoListService) gin.HandlerFunc {
-	return func(c *gin.Context) {
+func (h Handler) GetAllListsHandler(c *gin.Context) {
+	lists, err := h.TodoListService.GetAllLists()
 
-		todos, err := todoListService.GetAllToDosInList(c.Param("listid"))
-
-		if err != nil {
-			c.Status(http.StatusNotFound)
-			return
-		}
-
-		c.JSON(http.StatusOK, todos)
+	if err != nil {
+		c.Status(http.StatusNoContent)
+		return
 	}
 
+	c.JSON(http.StatusOK, lists)
 }
 
-func GetListHandler(todoListService service.ToDoListService) gin.HandlerFunc {
+func (h Handler) GetListHandler(c *gin.Context) {
+	list, err := h.TodoListService.GetList(c.Param("listid"))
 
-	return func(c *gin.Context) {
-
-		list, err := todoListService.GetList(c.Param("listid"))
-
-		if err != nil {
-			c.Status(http.StatusNotFound)
-			return
-		}
-
-		c.JSON(http.StatusOK, list)
+	if err != nil {
+		c.Status(http.StatusNotFound)
+		return
 	}
 
+	c.JSON(http.StatusOK, list)
 }
 
-func CreateListHandler(todoListService service.ToDoListService) gin.HandlerFunc {
+func (h *Handler) CreateListHandler(c *gin.Context) {
+	requestBody := new(models.RequestBodyList)
 
-	return func(c *gin.Context) {
-
-		requestBody := new(models.RequestBodyList)
-
-		if err := c.BindJSON(requestBody); err != nil {
-			return
-		}
-
-		todoListService.CreateList(requestBody)
-
-		c.Status(http.StatusCreated)
+	if err := c.BindJSON(requestBody); err != nil {
+		return
 	}
 
+	h.TodoListService.CreateList(requestBody)
+
+	c.Status(http.StatusCreated)
 }
 
-func PatchListHandler(todoListService service.ToDoListService) gin.HandlerFunc {
+func (h *Handler) PatchListHandler(c *gin.Context) {
+	requestBody := new(models.ToDoList)
 
-	return func(c *gin.Context) {
-
-		requestBody := new(models.ToDoList)
-
-		if err := c.BindJSON(requestBody); err != nil {
-			return
-		}
-
-		requestBody.Id = c.Param("listid")
-
-		err := todoListService.PatchList(requestBody)
-
-		if err != nil {
-			c.Status(http.StatusNotFound)
-			return
-		}
-
-		c.Status(http.StatusOK)
+	if err := c.BindJSON(requestBody); err != nil {
+		return
 	}
 
-}
+	requestBody.Id = c.Param("listid")
 
-func DeleteListHandler(todoListService service.ToDoListService) gin.HandlerFunc {
+	err := h.TodoListService.PatchList(requestBody)
 
-	return func(c *gin.Context) {
-
-		err := todoListService.DeleteList(c.Param("listid"))
-
-		if err != nil {
-			c.Status(http.StatusNotFound)
-			return
-		}
-
-		c.Status(http.StatusOK)
+	if err != nil {
+		c.Status(http.StatusNotFound)
+		return
 	}
 
+	c.Status(http.StatusOK)
 }
 
-func GetToDoHandler(todoListService service.ToDoListService) gin.HandlerFunc {
+func (h *Handler) DeleteListHandler(c *gin.Context) {
+	err := h.TodoListService.DeleteList(c.Param("listid"))
 
-	return func(c *gin.Context) {
-
-		todo, err := todoListService.GetToDoInList(c.Param("todoid"))
-
-		if err != nil {
-			c.Status(http.StatusNotFound)
-			return
-		}
-
-		c.JSON(http.StatusOK, todo)
+	if err != nil {
+		c.Status(http.StatusNotFound)
+		return
 	}
 
+	c.Status(http.StatusOK)
 }
 
-func DeleteToDoHandler(todoListService service.ToDoListService) gin.HandlerFunc {
+func (h Handler) GetToDoHandler(c *gin.Context) {
+	todo, err := h.TodoListService.GetToDoInList(c.Param("todoid"))
 
-	return func(c *gin.Context) {
-
-		err := todoListService.DeleteToDoInList(c.Param("todoid"))
-
-		if err != nil {
-			c.Status(http.StatusNotFound)
-			return
-		}
-
-		c.Status(http.StatusOK)
+	if err != nil {
+		c.Status(http.StatusNotFound)
+		return
 	}
 
+	c.JSON(http.StatusOK, todo)
 }
 
-func PatchToDoHandler(todoListService service.ToDoListService) gin.HandlerFunc {
+func (h *Handler) DeleteToDoHandler(c *gin.Context) {
+	err := h.TodoListService.DeleteToDoInList(c.Param("todoid"))
 
-	return func(c *gin.Context) {
-
-		requestBody := new(models.ToDo)
-
-		if err := c.BindJSON(requestBody); err != nil {
-			return
-		}
-
-		err := todoListService.PatchToDoInList(requestBody.Completed, c.Param("todoid"))
-
-		if err != nil {
-			c.Status(http.StatusNotFound)
-			return
-		}
-
-		c.Status(http.StatusOK)
-	}
-}
-
-func CreateToDoHandler(todoListService service.ToDoListService) gin.HandlerFunc {
-
-	return func(c *gin.Context) {
-
-		requestBody := new(models.ToDo)
-
-		if err := c.BindJSON(requestBody); err != nil {
-			return
-		}
-		if requestBody.Content == "" {
-			c.String(http.StatusBadRequest, "content can't be empty")
-			return
-		}
-		err := todoListService.CreateToDoInList(c.Param("listid"), requestBody.Content)
-
-		if err != nil {
-			c.Status(http.StatusNotFound)
-			return
-		}
-
-		c.Status(http.StatusCreated)
+	if err != nil {
+		c.Status(http.StatusNotFound)
+		return
 	}
 
+	c.Status(http.StatusOK)
 }
+
+func (h *Handler) PatchToDoHandler(c *gin.Context) {
+	requestBody := new(models.ToDo)
+
+	if err := c.BindJSON(requestBody); err != nil {
+		return
+	}
+
+	err := h.TodoListService.PatchToDoInList(requestBody.Completed, c.Param("todoid"))
+
+	if err != nil {
+		c.Status(http.StatusNotFound)
+		return
+	}
+
+	c.Status(http.StatusOK)
+}
+
+func (h *Handler) CreateToDoHandler(c *gin.Context) {
+	requestBody := new(models.ToDo)
+
+	if err := c.BindJSON(requestBody); err != nil {
+		return
+	}
+	if requestBody.Content == "" {
+		c.String(http.StatusBadRequest, "content can't be empty")
+		return
+	}
+	err := h.TodoListService.CreateToDoInList(c.Param("listid"), requestBody.Content)
+
+	if err != nil {
+		c.Status(http.StatusNotFound)
+		return
+	}
+
+	c.Status(http.StatusCreated)
+}
+
+func (h Handler) GetAllToDosHandler(c *gin.Context) {
+	todos, err := h.TodoListService.GetAllToDosInList(c.Param("listid"))
+
+	if err != nil {
+		c.Status(http.StatusNotFound)
+		return
+	}
+
+	c.JSON(http.StatusOK, todos)
+}
+
+// func GetAllListsHandler(todoListService service.ToDoListService) gin.HandlerFunc {
+// 	return func(c *gin.Context) {
+// 		lists, err := todoListService.GetAllLists()
+// 		if err != nil {
+// 			c.Status(204)
+// 			return
+// 		}
+// 		c.JSON(http.StatusOK, lists)
+// 	}
+
+// }
+
+// func GetAllTodosHandler(todoListService service.ToDoListService) gin.HandlerFunc {
+// 	return func(c *gin.Context) {
+
+// 		todos, err := todoListService.GetAllToDosInList(c.Param("listid"))
+
+// 		if err != nil {
+// 			c.Status(http.StatusNotFound)
+// 			return
+// 		}
+
+// 		c.JSON(http.StatusOK, todos)
+// 	}
+
+// }
+
+// func GetListHandler(todoListService service.ToDoListService) gin.HandlerFunc {
+
+// 	return func(c *gin.Context) {
+
+// 		list, err := todoListService.GetList(c.Param("listid"))
+
+// 		if err != nil {
+// 			c.Status(http.StatusNotFound)
+// 			return
+// 		}
+
+// 		c.JSON(http.StatusOK, list)
+// 	}
+
+// }
+
+// func CreateListHandler(todoListService service.ToDoListService) gin.HandlerFunc {
+
+// 	return func(c *gin.Context) {
+
+// 		requestBody := new(models.RequestBodyList)
+
+// 		if err := c.BindJSON(requestBody); err != nil {
+// 			return
+// 		}
+
+// 		todoListService.CreateList(requestBody)
+
+// 		c.Status(http.StatusCreated)
+// 	}
+
+// }
+
+// func PatchListHandler(todoListService service.ToDoListService) gin.HandlerFunc {
+
+// 	return func(c *gin.Context) {
+
+// 		requestBody := new(models.ToDoList)
+
+// 		if err := c.BindJSON(requestBody); err != nil {
+// 			return
+// 		}
+
+// 		requestBody.Id = c.Param("listid")
+
+// 		err := todoListService.PatchList(requestBody)
+
+// 		if err != nil {
+// 			c.Status(http.StatusNotFound)
+// 			return
+// 		}
+
+// 		c.Status(http.StatusOK)
+// 	}
+
+// }
+
+// func DeleteListHandler(todoListService service.ToDoListService) gin.HandlerFunc {
+
+// 	return func(c *gin.Context) {
+
+// 		err := todoListService.DeleteList(c.Param("listid"))
+
+// 		if err != nil {
+// 			c.Status(http.StatusNotFound)
+// 			return
+// 		}
+
+// 		c.Status(http.StatusOK)
+// 	}
+
+// }
+
+// func GetToDoHandler(todoListService service.ToDoListService) gin.HandlerFunc {
+
+// 	return func(c *gin.Context) {
+
+// 		todo, err := todoListService.GetToDoInList(c.Param("todoid"))
+
+// 		if err != nil {
+// 			c.Status(http.StatusNotFound)
+// 			return
+// 		}
+
+// 		c.JSON(http.StatusOK, todo)
+// 	}
+
+// }
+
+// func DeleteToDoHandler(todoListService service.ToDoListService) gin.HandlerFunc {
+
+// 	return func(c *gin.Context) {
+
+// 		err := todoListService.DeleteToDoInList(c.Param("todoid"))
+
+// 		if err != nil {
+// 			c.Status(http.StatusNotFound)
+// 			return
+// 		}
+
+// 		c.Status(http.StatusOK)
+// 	}
+
+// }
+
+// func PatchToDoHandler(todoListService service.ToDoListService) gin.HandlerFunc {
+
+// 	return func(c *gin.Context) {
+
+// 		requestBody := new(models.ToDo)
+
+// 		if err := c.BindJSON(requestBody); err != nil {
+// 			return
+// 		}
+
+// 		err := todoListService.PatchToDoInList(requestBody.Completed, c.Param("todoid"))
+
+// 		if err != nil {
+// 			c.Status(http.StatusNotFound)
+// 			return
+// 		}
+
+// 		c.Status(http.StatusOK)
+// 	}
+// }
+
+// func CreateToDoHandler(todoListService service.ToDoListService) gin.HandlerFunc {
+
+// 	return func(c *gin.Context) {
+
+// 		requestBody := new(models.ToDo)
+
+// 		if err := c.BindJSON(requestBody); err != nil {
+// 			return
+// 		}
+// 		if requestBody.Content == "" {
+// 			c.String(http.StatusBadRequest, "content can't be empty")
+// 			return
+// 		}
+// 		err := todoListService.CreateToDoInList(c.Param("listid"), requestBody.Content)
+
+// 		if err != nil {
+// 			c.Status(http.StatusNotFound)
+// 			return
+// 		}
+
+// 		c.Status(http.StatusCreated)
+// 	}
+
+// }

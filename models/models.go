@@ -4,7 +4,7 @@ type ToDo struct {
 	Id        string `json:"todoid,omitempty"`
 	ListId    string `json:"todolistid,omitempty"`
 	Content   string `json:"content,omitempty"`
-	Completed bool   `json:"completed" binding:"required"`
+	Completed bool   `json:"completed"`
 }
 
 type ToDoList struct {
