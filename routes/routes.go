@@ -4,13 +4,12 @@ import (
 	"gogin-api/controllers"
 	"gogin-api/logs"
 	"gogin-api/middlewares"
-	"gogin-api/models"
 	"gogin-api/service"
 
 	"github.com/gin-gonic/gin"
 )
 
-func newToDoListService() models.ToDoListService {
+func newToDoListService() service.ToDoListService {
 	return &service.ToDoListRepo{}
 }
 

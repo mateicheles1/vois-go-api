@@ -2,12 +2,13 @@ package controllers
 
 import (
 	"gogin-api/models"
+	"gogin-api/service"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-func GetAllListsHandler(todoListService models.ToDoListService) gin.HandlerFunc {
+func GetAllListsHandler(todoListService service.ToDoListService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		lists, err := todoListService.GetAllLists()
 		if err != nil {
@@ -19,7 +20,7 @@ func GetAllListsHandler(todoListService models.ToDoListService) gin.HandlerFunc 
 
 }
 
-func GetAllTodosHandler(todoListService models.ToDoListService) gin.HandlerFunc {
+func GetAllTodosHandler(todoListService service.ToDoListService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		todos, err := todoListService.GetAllToDosInList(c.Param("listid"))
@@ -34,7 +35,7 @@ func GetAllTodosHandler(todoListService models.ToDoListService) gin.HandlerFunc 
 
 }
 
-func GetListHandler(todoListService models.ToDoListService) gin.HandlerFunc {
+func GetListHandler(todoListService service.ToDoListService) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 
@@ -50,7 +51,7 @@ func GetListHandler(todoListService models.ToDoListService) gin.HandlerFunc {
 
 }
 
-func CreateListHandler(todoListService models.ToDoListService) gin.HandlerFunc {
+func CreateListHandler(todoListService service.ToDoListService) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 
@@ -67,7 +68,7 @@ func CreateListHandler(todoListService models.ToDoListService) gin.HandlerFunc {
 
 }
 
-func PatchListHandler(todoListService models.ToDoListService) gin.HandlerFunc {
+func PatchListHandler(todoListService service.ToDoListService) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 
@@ -91,7 +92,7 @@ func PatchListHandler(todoListService models.ToDoListService) gin.HandlerFunc {
 
 }
 
-func DeleteListHandler(todoListService models.ToDoListService) gin.HandlerFunc {
+func DeleteListHandler(todoListService service.ToDoListService) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 
@@ -107,7 +108,7 @@ func DeleteListHandler(todoListService models.ToDoListService) gin.HandlerFunc {
 
 }
 
-func GetToDoHandler(todoListService models.ToDoListService) gin.HandlerFunc {
+func GetToDoHandler(todoListService service.ToDoListService) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 
@@ -123,7 +124,7 @@ func GetToDoHandler(todoListService models.ToDoListService) gin.HandlerFunc {
 
 }
 
-func DeleteToDoHandler(todoListService models.ToDoListService) gin.HandlerFunc {
+func DeleteToDoHandler(todoListService service.ToDoListService) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 
@@ -139,7 +140,7 @@ func DeleteToDoHandler(todoListService models.ToDoListService) gin.HandlerFunc {
 
 }
 
-func PatchToDoHandler(todoListService models.ToDoListService) gin.HandlerFunc {
+func PatchToDoHandler(todoListService service.ToDoListService) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 
@@ -160,7 +161,7 @@ func PatchToDoHandler(todoListService models.ToDoListService) gin.HandlerFunc {
 	}
 }
 
-func CreateToDoHandler(todoListService models.ToDoListService) gin.HandlerFunc {
+func CreateToDoHandler(todoListService service.ToDoListService) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 
