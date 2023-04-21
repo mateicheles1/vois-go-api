@@ -9,11 +9,11 @@ import (
 )
 
 type Handler struct {
-	TodoListService service.ToDoListService
+	Service service.ToDoListService
 }
 
 func (h Handler) GetAllListsHandler(c *gin.Context) {
-	lists, err := h.TodoListService.GetAllLists()
+	lists, err := h.Service.GetAllLists()
 
 	if err != nil {
 		c.Status(http.StatusNoContent)
@@ -24,7 +24,7 @@ func (h Handler) GetAllListsHandler(c *gin.Context) {
 }
 
 func (h Handler) GetListHandler(c *gin.Context) {
-	list, err := h.TodoListService.GetList(c.Param("listid"))
+	list, err := h.Service.GetList(c.Param("listid"))
 
 	if err != nil {
 		c.Status(http.StatusNotFound)
@@ -41,7 +41,7 @@ func (h *Handler) CreateListHandler(c *gin.Context) {
 		return
 	}
 
-	h.TodoListService.CreateList(requestBody)
+	h.Service.CreateList(requestBody)
 
 	c.Status(http.StatusCreated)
 }
@@ -55,7 +55,7 @@ func (h *Handler) PatchListHandler(c *gin.Context) {
 
 	requestBody.Id = c.Param("listid")
 
-	err := h.TodoListService.PatchList(requestBody)
+	err := h.Service.PatchList(requestBody)
 
 	if err != nil {
 		c.Status(http.StatusNotFound)
@@ -66,7 +66,7 @@ func (h *Handler) PatchListHandler(c *gin.Context) {
 }
 
 func (h *Handler) DeleteListHandler(c *gin.Context) {
-	err := h.TodoListService.DeleteList(c.Param("listid"))
+	err := h.Service.DeleteList(c.Param("listid"))
 
 	if err != nil {
 		c.Status(http.StatusNotFound)
@@ -77,7 +77,7 @@ func (h *Handler) DeleteListHandler(c *gin.Context) {
 }
 
 func (h Handler) GetToDoHandler(c *gin.Context) {
-	todo, err := h.TodoListService.GetToDoInList(c.Param("todoid"))
+	todo, err := h.Service.GetToDoInList(c.Param("todoid"))
 
 	if err != nil {
 		c.Status(http.StatusNotFound)
@@ -88,7 +88,7 @@ func (h Handler) GetToDoHandler(c *gin.Context) {
 }
 
 func (h *Handler) DeleteToDoHandler(c *gin.Context) {
-	err := h.TodoListService.DeleteToDoInList(c.Param("todoid"))
+	err := h.Service.DeleteToDoInList(c.Param("todoid"))
 
 	if err != nil {
 		c.Status(http.StatusNotFound)
@@ -105,7 +105,7 @@ func (h *Handler) PatchToDoHandler(c *gin.Context) {
 		return
 	}
 
-	err := h.TodoListService.PatchToDoInList(requestBody.Completed, c.Param("todoid"))
+	err := h.Service.PatchToDoInList(requestBody.Completed, c.Param("todoid"))
 
 	if err != nil {
 		c.Status(http.StatusNotFound)
@@ -125,7 +125,7 @@ func (h *Handler) CreateToDoHandler(c *gin.Context) {
 		c.String(http.StatusBadRequest, "content can't be empty")
 		return
 	}
-	err := h.TodoListService.CreateToDoInList(c.Param("listid"), requestBody.Content)
+	err := h.Service.CreateToDoInList(c.Param("listid"), requestBody.Content)
 
 	if err != nil {
 		c.Status(http.StatusNotFound)
@@ -136,7 +136,7 @@ func (h *Handler) CreateToDoHandler(c *gin.Context) {
 }
 
 func (h Handler) GetAllToDosHandler(c *gin.Context) {
-	todos, err := h.TodoListService.GetAllToDosInList(c.Param("listid"))
+	todos, err := h.Service.GetAllToDosInList(c.Param("listid"))
 
 	if err != nil {
 		c.Status(http.StatusNotFound)

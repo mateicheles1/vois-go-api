@@ -5,13 +5,14 @@ import (
 	"gogin-api/logs"
 	"gogin-api/middlewares"
 	"gogin-api/service"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-func newHandler() *controllers.Handler {
-	return &controllers.Handler{
-		TodoListService: &service.ToDoListRepo{},
+func newHandler() controllers.Handler {
+	return controllers.Handler{
+		Service: &service.ToDoListRepo{},
 	}
 }
 
@@ -40,10 +41,10 @@ func SetupRoutes() {
 	// route for getting the entire data structure
 
 	r.GET("/api/v2/data-structure", func(c *gin.Context) {
-		if handler == nil {
-			c.Status(204)
+		if handler.Service == nil {
+			c.Status(http.StatusNoContent)
 		} else {
-			c.JSON(200, handler)
+			c.JSON(http.StatusOK, handler.Service)
 		}
 	})
 
