@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"gogin-api/models"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -13,7 +14,7 @@ func GetAllListsHandler(todoListService models.ToDoListService) gin.HandlerFunc 
 			c.Status(204)
 			return
 		}
-		c.JSON(200, lists)
+		c.JSON(http.StatusOK, lists)
 	}
 
 }
@@ -24,11 +25,11 @@ func GetAllTodosHandler(todoListService models.ToDoListService) gin.HandlerFunc 
 		todos, err := todoListService.GetAllToDosInList(c.Param("listid"))
 
 		if err != nil {
-			c.Status(404)
+			c.Status(http.StatusNotFound)
 			return
 		}
 
-		c.JSON(200, todos)
+		c.JSON(http.StatusOK, todos)
 	}
 
 }
@@ -40,11 +41,11 @@ func GetListHandler(todoListService models.ToDoListService) gin.HandlerFunc {
 		list, err := todoListService.GetList(c.Param("listid"))
 
 		if err != nil {
-			c.Status(404)
+			c.Status(http.StatusNotFound)
 			return
 		}
 
-		c.JSON(200, list)
+		c.JSON(http.StatusOK, list)
 	}
 
 }
@@ -61,7 +62,7 @@ func CreateListHandler(todoListService models.ToDoListService) gin.HandlerFunc {
 
 		todoListService.CreateList(requestBody)
 
-		c.Status(201)
+		c.Status(http.StatusCreated)
 	}
 
 }
@@ -81,11 +82,11 @@ func PatchListHandler(todoListService models.ToDoListService) gin.HandlerFunc {
 		err := todoListService.PatchList(requestBody)
 
 		if err != nil {
-			c.Status(404)
+			c.Status(http.StatusNotFound)
 			return
 		}
 
-		c.Status(200)
+		c.Status(http.StatusOK)
 	}
 
 }
@@ -97,11 +98,11 @@ func DeleteListHandler(todoListService models.ToDoListService) gin.HandlerFunc {
 		err := todoListService.DeleteList(c.Param("listid"))
 
 		if err != nil {
-			c.Status(404)
+			c.Status(http.StatusNotFound)
 			return
 		}
 
-		c.Status(200)
+		c.Status(http.StatusOK)
 	}
 
 }
@@ -113,11 +114,11 @@ func GetToDoHandler(todoListService models.ToDoListService) gin.HandlerFunc {
 		todo, err := todoListService.GetToDoInList(c.Param("todoid"))
 
 		if err != nil {
-			c.Status(404)
+			c.Status(http.StatusNotFound)
 			return
 		}
 
-		c.JSON(200, todo)
+		c.JSON(http.StatusOK, todo)
 	}
 
 }
@@ -129,11 +130,11 @@ func DeleteToDoHandler(todoListService models.ToDoListService) gin.HandlerFunc {
 		err := todoListService.DeleteToDoInList(c.Param("todoid"))
 
 		if err != nil {
-			c.Status(404)
+			c.Status(http.StatusNotFound)
 			return
 		}
 
-		c.Status(200)
+		c.Status(http.StatusOK)
 	}
 
 }
@@ -151,11 +152,11 @@ func PatchToDoHandler(todoListService models.ToDoListService) gin.HandlerFunc {
 		err := todoListService.PatchToDoInList(requestBody.Completed, c.Param("todoid"))
 
 		if err != nil {
-			c.Status(404)
+			c.Status(http.StatusNotFound)
 			return
 		}
 
-		c.Status(200)
+		c.Status(http.StatusOK)
 	}
 }
 
@@ -169,17 +170,17 @@ func CreateToDoHandler(todoListService models.ToDoListService) gin.HandlerFunc {
 			return
 		}
 		if requestBody.Content == "" {
-			c.String(400, "content can't be empty")
+			c.String(http.StatusBadRequest, "content can't be empty")
 			return
 		}
 		err := todoListService.CreateToDoInList(c.Param("listid"), requestBody.Content)
 
 		if err != nil {
-			c.Status(404)
+			c.Status(http.StatusNotFound)
 			return
 		}
 
-		c.Status(201)
+		c.Status(http.StatusCreated)
 	}
 
 }
