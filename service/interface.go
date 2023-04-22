@@ -14,4 +14,6 @@ type ToDoListServiceInterface interface {
 	GetToDoInList(key string) (*models.ToDo, error)
 	DeleteToDoInList(key string) error
 	GetAllToDosInList(listId string) ([]models.ToDo, error)
+
+	GetDataStructure() (map[string]*models.ToDoList, error)
 }
