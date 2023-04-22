@@ -10,18 +10,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func newHandler() controllers.Handler {
-	todoListRepo := new(service.ToDoListService)
-	handler := controllers.Handler{
-		Service: todoListRepo,
+func newHandler(service service.ToDoListServiceInterface) controllers.Handler {
+	return controllers.Handler{
+		Service: service,
 	}
-	return handler
 }
 
 func SetupRoutes() {
 	r := gin.New()
 
-	handler := newHandler()
+	handler := newHandler(&service.ToDoListService{})
 
 	r.Use(middlewares.ErrorHandler())
 	r.Use(middlewares.InfoHandler())
