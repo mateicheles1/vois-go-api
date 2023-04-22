@@ -2,15 +2,10 @@ package controllers
 
 import (
 	"gogin-api/models"
-	"gogin-api/service"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
-
-type Handler struct {
-	Service service.ToDoListServiceInterface
-}
 
 func (h Handler) GetAllListsHandler(c *gin.Context) {
 	lists, err := h.Service.GetAllLists()
