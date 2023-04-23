@@ -18,7 +18,7 @@ func ErrorHandler() gin.HandlerFunc {
 		}
 
 		if len(c.Errors) != 0 {
-			c.String(-1, "error processing request; invalid syntax")
+			c.JSON(-1, "error processing request; invalid syntax")
 		}
 	}
 }

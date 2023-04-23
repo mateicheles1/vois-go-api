@@ -2,6 +2,7 @@ package routes
 
 import (
 	"gogin-api/controllers"
+	"gogin-api/data"
 	"gogin-api/logs"
 	"gogin-api/middlewares"
 	"gogin-api/service"
@@ -9,16 +10,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func newHandler(service service.ToDoListServiceInterface) controllers.Handler {
-	return controllers.Handler{
-		Service: service,
-	}
-}
-
 func SetupRoutes() {
-	r := gin.New()
+	handler := controllers.NewHandler(service.NewToDoListService(data.ToDoListRepo{}))
 
-	handler := newHandler(&service.ToDoListService{})
+	r := gin.New()
 
 	r.Use(middlewares.ErrorHandler())
 	r.Use(middlewares.InfoHandler())
