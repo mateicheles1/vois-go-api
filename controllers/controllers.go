@@ -22,7 +22,7 @@ func (h Handler) GetListHandler(c *gin.Context) {
 	list, err := h.Service.GetList(c.Param("listid"))
 
 	if err != nil {
-		c.Status(http.StatusNotFound)
+		c.JSON(http.StatusNotFound, err.Error())
 		return
 	}
 
@@ -53,7 +53,7 @@ func (h *Handler) PatchListHandler(c *gin.Context) {
 	err := h.Service.PatchList(requestBody)
 
 	if err != nil {
-		c.Status(http.StatusNotFound)
+		c.JSON(http.StatusNotFound, err.Error())
 		return
 	}
 
@@ -64,7 +64,7 @@ func (h *Handler) DeleteListHandler(c *gin.Context) {
 	err := h.Service.DeleteList(c.Param("listid"))
 
 	if err != nil {
-		c.Status(http.StatusNotFound)
+		c.JSON(http.StatusNotFound, err.Error())
 		return
 	}
 
@@ -75,7 +75,7 @@ func (h Handler) GetToDoHandler(c *gin.Context) {
 	todo, err := h.Service.GetToDoInList(c.Param("todoid"))
 
 	if err != nil {
-		c.Status(http.StatusNotFound)
+		c.JSON(http.StatusNotFound, err.Error())
 		return
 	}
 
@@ -86,7 +86,7 @@ func (h *Handler) DeleteToDoHandler(c *gin.Context) {
 	err := h.Service.DeleteToDoInList(c.Param("todoid"))
 
 	if err != nil {
-		c.Status(http.StatusNotFound)
+		c.JSON(http.StatusNotFound, err.Error())
 		return
 	}
 
@@ -103,7 +103,7 @@ func (h *Handler) PatchToDoHandler(c *gin.Context) {
 	err := h.Service.PatchToDoInList(requestBody.Completed, c.Param("todoid"))
 
 	if err != nil {
-		c.Status(http.StatusNotFound)
+		c.JSON(http.StatusNotFound, err.Error())
 		return
 	}
 
@@ -121,7 +121,7 @@ func (h *Handler) CreateToDoHandler(c *gin.Context) {
 		return
 	}
 	if err := h.Service.CreateToDoInList(c.Param("listid"), requestBody.Content); err != nil {
-		c.Status(http.StatusNotFound)
+		c.JSON(http.StatusNotFound, err.Error())
 		return
 	}
 
@@ -132,7 +132,7 @@ func (h Handler) GetAllToDosHandler(c *gin.Context) {
 	todos, err := h.Service.GetAllToDosInList(c.Param("listid"))
 
 	if err != nil {
-		c.Status(http.StatusNotFound)
+		c.JSON(http.StatusNotFound, err.Error())
 		return
 	}
 
@@ -143,7 +143,7 @@ func (h Handler) GetDataStructureHandler(c *gin.Context) {
 	dataStructure, err := h.Service.GetDataStructure()
 
 	if err != nil {
-		c.Status(http.StatusNoContent)
+		c.JSON(http.StatusNoContent, err.Error())
 		return
 	}
 
