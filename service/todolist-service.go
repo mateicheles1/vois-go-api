@@ -3,11 +3,11 @@ package service
 import "gogin-api/data"
 
 type ToDoListService struct {
-	repo data.ToDoListRepo
+	db data.ToDoListDB
 }
 
-func NewToDoListService(repo data.ToDoListRepo) *ToDoListService {
+func NewToDoListService(data data.ToDoListDB) *ToDoListService {
 	return &ToDoListService{
-		repo: repo,
+		db: data,
 	}
 }

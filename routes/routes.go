@@ -11,7 +11,8 @@ import (
 )
 
 func SetupRoutes() {
-	handler := controllers.NewHandler(service.NewToDoListService(data.ToDoListRepo{}))
+	service := service.NewToDoListService(data.ToDoListDB{})
+	handler := controllers.NewHandler(service)
 
 	r := gin.New()
 

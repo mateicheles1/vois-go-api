@@ -2,6 +2,6 @@ package data
 
 import "gogin-api/models"
 
-type ToDoListRepo struct {
+type ToDoListDB struct {
 	Lists map[string]*models.ToDoList
 }
