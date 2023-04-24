@@ -8,9 +8,11 @@ import (
 )
 
 func (s *ToDoListService) CreateList(reqBody *models.RequestBodyList) {
+
 	if s.db.Lists == nil {
 		s.db.Lists = make(map[string]*models.ToDoList)
 	}
+
 	listKey := uuid.New().String()
 
 	todos := make(map[string]*models.ToDo)
