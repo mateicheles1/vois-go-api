@@ -9,16 +9,18 @@ import (
 func ErrorHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Next()
+		errorOccured := false
 		for _, err := range c.Errors {
 			logs.ErrorLogger.Error().
 				Str("Method", c.Request.Method).
 				Str("Path", c.Request.URL.Path).
 				Int("Status code", c.Writer.Status()).
-				Msgf("Could not bind the request body to desired struct due to: %s", err.Error())
+				Msgf("JSON syntax error in request body: %s", err.Error())
+			errorOccured = true
 		}
 
-		if len(c.Errors) != 0 {
-			c.JSON(-1, "error processing request; invalid syntax")
+		if errorOccured {
+			c.JSON(c.Writer.Status(), "Error processing request: invalid JSON syntax in request body")
 		}
 	}
 }

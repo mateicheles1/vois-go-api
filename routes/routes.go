@@ -12,7 +12,7 @@ import (
 
 func SetupRoutes() {
 
-	// handler made from 2 constructor function. 1. the constructor function that instances the service and 2. the const function that instances the handler
+	// controller made from 2 constructor function. 1. the constructor function that instances the service and 2. the const function that instances the handler
 
 	controller := controllers.NewController(service.NewToDoListService(data.ToDoListDB{}))
 
