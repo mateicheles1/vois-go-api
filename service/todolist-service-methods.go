@@ -2,10 +2,21 @@ package service
 
 import (
 	"errors"
+	"gogin-api/data"
 	"gogin-api/models"
 
 	"github.com/google/uuid"
 )
+
+type ToDoListService struct {
+	db data.ToDoListDB
+}
+
+func NewToDoListService(data data.ToDoListDB) *ToDoListService {
+	return &ToDoListService{
+		db: data,
+	}
+}
 
 func (s *ToDoListService) CreateList(reqBody *models.RequestBodyList) {
 
