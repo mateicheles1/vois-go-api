@@ -22,7 +22,7 @@ func SetupRoutes() {
 	r.Use(middlewares.InfoHandler())
 	r.Use(gin.Recovery())
 
-	r.GET("api/v2/lists", controller.CreateListController)
+	r.GET("api/v2/lists", controller.GetAllListsController)
 	r.GET("api/v2/lists/:listid/todos", controller.GetAllToDosController)
 
 	r.GET("api/v2/lists/:listid", controller.GetListController)

@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"gogin-api/models"
 	"gogin-api/service"
 	"net/http"
@@ -47,7 +48,9 @@ func (c *Controller) CreateListController(ctx *gin.Context) {
 		return
 	}
 
-	c.Service.CreateList(requestBody)
+	listId := c.Service.CreateList(requestBody)
+
+	ctx.Header("Location", fmt.Sprintf("/api/v2/lists/%s", listId))
 
 	ctx.Status(http.StatusCreated)
 }
@@ -133,10 +136,14 @@ func (c *Controller) CreateToDoController(ctx *gin.Context) {
 		return
 	}
 
-	if err := c.Service.CreateToDoInList(ctx.Param("listid"), requestBody.Content); err != nil {
+	id, err := c.Service.CreateToDoInList(ctx.Param("listid"), requestBody.Content)
+
+	if err != nil {
 		ctx.JSON(http.StatusNotFound, err.Error())
 		return
 	}
+
+	ctx.Header("Location", fmt.Sprintf("/api/v2/todos/%s", id))
 
 	ctx.Status(http.StatusCreated)
 }
