@@ -18,6 +18,8 @@ func NewToDoListService(data data.ToDoListDB) *ToDoListService {
 	}
 }
 
+// create list nu returneaza o eroare pentru ca am acoperit toate scenariile care ar putea arunca ceva de genul. pe struct-ul de request body am binding required pe field-uri deci automat se apeleaza middleware-ul daca e sa nu fie ok, iar daca map-ul nu e initializat, se face aici. sper ca nu am ratat ceva. functia returneaza id-ul listei ca sa fie pus in location in header.
+
 func (s *ToDoListService) CreateList(reqBody *models.RequestBodyList) string {
 
 	if s.db.Lists == nil {

@@ -22,6 +22,8 @@ func NewController(service service.ToDoListServiceInterface) *Controller {
 func (c *Controller) GetAllListsController(ctx *gin.Context) {
 	lists, err := c.Service.GetAllLists()
 
+	// am citit ca desi resursa e empty, se recomanda sa se foloseasca http status ok ca sa arate ca cererea a fost procesata cum trebuie si aditional un msg care sa spuna ca resursa e empty
+
 	if err != nil {
 		ctx.JSON(http.StatusOK, err.Error())
 		return
@@ -48,6 +50,8 @@ func (c *Controller) CreateListController(ctx *gin.Context) {
 		return
 	}
 
+	// in metodele din service pe create am zis sa returneze id-ul listei nou create si sa fie pusa in response header, in loc sa trimit intreaga resursa intr-un raspuns. din cate am inteles, rest api impune status code-ul created si un header cu locatia. resursa in body e optionala.
+
 	listId := c.Service.CreateList(requestBody)
 
 	ctx.Header("Location", fmt.Sprintf("/api/v2/lists/%s", listId))
@@ -70,6 +74,8 @@ func (c *Controller) PatchListController(ctx *gin.Context) {
 		ctx.JSON(http.StatusNotFound, err.Error())
 		return
 	}
+
+	// la fel, din cate am inteles ramane la decizia developerului daca returneaza un http statusok sau nocontent pe operatiile de patch si delete si am ales no content. nu am reusit sa-mi dau seama care dintre ele este folosita cel mai des.
 
 	ctx.Status(http.StatusNoContent)
 }

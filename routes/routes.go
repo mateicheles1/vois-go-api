@@ -12,7 +12,7 @@ import (
 
 func SetupRoutes() {
 
-	// controller made from 2 constructor function. 1. the constructor function that instances the service and 2. the const function that instances the handler
+	// controller-ul care primeste o implementare a interfetei care la randul ei, tot prin constructor function, primeste un struct de tip todolistdb. am ales sa fac asa ca sa pot schimba implementarea interfetei si orice instantare a struct-ului `ToDoListDB`, astfel utilizand dependency injection si loose coupling a diverselor componente din app.
 
 	controller := controllers.NewController(service.NewToDoListService(data.ToDoListDB{}))
 
@@ -35,7 +35,7 @@ func SetupRoutes() {
 	r.PATCH("api/v2/todos/:todoid", controller.PatchToDoController)
 	r.DELETE("api/v2/todos/:todoid", controller.DeleteToDoController)
 
-	// route to check the entire data structure. isn't part of the api
+	// ruta sa vad intreaga structura de date. nu face parte din api
 	r.GET("api/v2/data-structure", controller.GetDataStructureController)
 
 	if err := r.Run(); err != nil {
