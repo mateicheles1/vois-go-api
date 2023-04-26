@@ -95,6 +95,7 @@ func (s *ToDoListService) GetAllLists() ([]models.ResponseBodyList, error) {
 }
 
 func (s *ToDoListService) CreateToDoInList(listId string, content string) (string, error) {
+
 	if _, hasList := s.db.Lists[listId]; hasList {
 		key := uuid.New().String()
 		s.db.Lists[listId].Todos[key] = &models.ToDo{
@@ -141,15 +142,16 @@ func (s *ToDoListService) DeleteToDoInList(key string) error {
 }
 
 func (s *ToDoListService) GetAllToDosInList(listId string) ([]models.ToDo, error) {
+
 	if _, hasList := s.db.Lists[listId]; hasList {
 		var todos []models.ToDo
 		for _, todo := range s.db.Lists[listId].Todos {
-			responseToDo := &models.ToDo{
+			responseToDo := models.ToDo{
 				Id:        todo.Id,
 				Content:   todo.Content,
 				Completed: todo.Completed,
 			}
-			todos = append(todos, *responseToDo)
+			todos = append(todos, responseToDo)
 		}
 		return todos, nil
 	}
@@ -158,9 +160,11 @@ func (s *ToDoListService) GetAllToDosInList(listId string) ([]models.ToDo, error
 }
 
 func (s *ToDoListService) GetDataStructure() (map[string]*models.ToDoList, error) {
+
 	if s.db.Lists == nil {
 		return nil, errors.New("no content")
-	} else {
-		return s.db.Lists, nil
 	}
+
+	return s.db.Lists, nil
+
 }

@@ -23,7 +23,7 @@ func (c *Controller) GetAllListsController(ctx *gin.Context) {
 	lists, err := c.Service.GetAllLists()
 
 	if err != nil {
-		ctx.Status(http.StatusNoContent)
+		ctx.JSON(http.StatusOK, err.Error())
 		return
 	}
 
@@ -71,7 +71,7 @@ func (c *Controller) PatchListController(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Status(http.StatusOK)
+	ctx.Status(http.StatusNoContent)
 }
 
 func (c *Controller) DeleteListController(ctx *gin.Context) {
@@ -82,7 +82,7 @@ func (c *Controller) DeleteListController(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Status(http.StatusOK)
+	ctx.Status(http.StatusNoContent)
 }
 
 func (c *Controller) GetToDoController(ctx *gin.Context) {
@@ -104,7 +104,7 @@ func (c *Controller) DeleteToDoController(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Status(http.StatusOK)
+	ctx.Status(http.StatusNoContent)
 }
 
 func (c *Controller) PatchToDoController(ctx *gin.Context) {
@@ -121,7 +121,7 @@ func (c *Controller) PatchToDoController(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Status(http.StatusOK)
+	ctx.Status(http.StatusNoContent)
 }
 
 func (c *Controller) CreateToDoController(ctx *gin.Context) {
@@ -163,9 +163,9 @@ func (c *Controller) GetDataStructureController(ctx *gin.Context) {
 	dataStructure, err := c.Service.GetDataStructure()
 
 	if err != nil {
-		ctx.JSON(http.StatusNoContent, err.Error())
+		ctx.JSON(http.StatusOK, err.Error())
 		return
 	}
 
-	ctx.JSON(200, dataStructure)
+	ctx.JSON(http.StatusOK, dataStructure)
 }
