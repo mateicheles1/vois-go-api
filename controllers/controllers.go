@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"gogin-api/models"
 	"gogin-api/service"
 	"net/http"
@@ -31,12 +30,12 @@ func (c *Controller) CreateList(ctx *gin.Context) {
 	if err != nil {
 
 		if err.Error() == "empty owner" {
-			ctx.JSON(http.StatusBadRequest, "invalid JSON syntax in request body; empty owner")
+			ctx.AbortWithError(http.StatusBadRequest, err)
 			return
 		}
 
 		if err.Error() != "empty owner" {
-			ctx.JSON(http.StatusInternalServerError, "something went wrong")
+			ctx.AbortWithError(http.StatusInternalServerError, err)
 			return
 		}
 	}
@@ -57,7 +56,7 @@ func (c *Controller) CreateToDo(ctx *gin.Context) {
 
 	if err != nil {
 		if err.Error() == "empty content" {
-			ctx.JSON(http.StatusBadRequest, err.Error())
+			ctx.AbortWithError(http.StatusBadRequest, err)
 			return
 		}
 
@@ -73,11 +72,8 @@ func (c *Controller) CreateToDo(ctx *gin.Context) {
 
 func (c *Controller) GetList(ctx *gin.Context) {
 
-	var list *models.ResponseBodyList
-	var err error
-
 	listId := ctx.Param("listid")
-	list, err = c.Service.GetList(listId)
+	list, err := c.Service.GetList(listId)
 
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, err.Error())
@@ -90,10 +86,8 @@ func (c *Controller) GetList(ctx *gin.Context) {
 
 func (c *Controller) GetToDo(ctx *gin.Context) {
 	todoId := ctx.Param("todoid")
-	var todo *models.ToDo
-	var err error
 
-	todo, err = c.Service.GetToDoInList(todoId)
+	todo, err := c.Service.GetToDoInList(todoId)
 
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, err.Error())
@@ -105,8 +99,6 @@ func (c *Controller) GetToDo(ctx *gin.Context) {
 
 func (c *Controller) GetAllLists(ctx *gin.Context) {
 	lists, message := c.Service.GetAllLists()
-
-	fmt.Printf("Retrieved lists: %+v, message: %s\n", lists, message)
 
 	if message != "" {
 		ctx.JSON(http.StatusOK, message)
@@ -163,12 +155,12 @@ func (c *Controller) PatchToDo(ctx *gin.Context) {
 	if err != nil {
 
 		if err.Error() == "todo already completed" {
-			ctx.JSON(http.StatusBadRequest, err.Error())
+			ctx.AbortWithError(http.StatusBadRequest, err)
 			return
 		}
 
 		if err.Error() == "todo already not completed" {
-			ctx.JSON(http.StatusBadRequest, err.Error())
+			ctx.AbortWithError(http.StatusBadRequest, err)
 			return
 		}
 

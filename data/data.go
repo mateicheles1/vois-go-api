@@ -162,7 +162,7 @@ func (db *ToDoListDB) DeleteToDoInList(todoId string) error {
 }
 
 func (db *ToDoListDB) GetDataStructure() (map[string]*models.ToDoList, string) {
-	if db.Lists == nil {
+	if len(db.Lists) == 0 {
 		return nil, "no content"
 	}
 
