@@ -7,22 +7,18 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-var LogFile *os.File
-var Err error
-
-func errorLogger() zerolog.Logger {
-
-	LogFile, Err = os.OpenFile(
+func errorLogger() (zerolog.Logger, *os.File) {
+	logFile, err := os.OpenFile(
 		"./logs/log-file.log",
 		os.O_RDWR|os.O_CREATE|os.O_APPEND,
 		0777,
 	)
-	if Err != nil {
-		log.Panic().Msgf("Could not open file due to: %s", Err.Error())
+	if err != nil {
+		log.Panic().Msgf("Could not open file due to: %s", err.Error())
 	}
 
-	logger := zerolog.New(LogFile).With().Timestamp().Caller().Logger()
-	return logger
+	logger := zerolog.New(logFile).With().Timestamp().Caller().Logger()
+	return logger, logFile
 }
 
-var ErrorLogger = errorLogger()
+var ErrorLogger, LogFile = errorLogger()

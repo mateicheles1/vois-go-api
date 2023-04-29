@@ -5,6 +5,7 @@ import (
 	"gogin-api/data"
 	"gogin-api/logs"
 	"gogin-api/middlewares"
+	"gogin-api/models"
 	"gogin-api/service"
 
 	"github.com/gin-gonic/gin"
@@ -13,8 +14,10 @@ import (
 func SetupRoutes() {
 
 	// controller-ul care primeste o implementare a interfetei care la randul ei, tot prin constructor function, primeste un struct de tip todolistdb. am ales sa fac asa ca sa pot schimba implementarea interfetei si orice instantare a struct-ului `ToDoListDB`, astfel utilizand dependency injection si loose coupling a diverselor componente din app.
-
-	controller := controllers.NewController(service.NewToDoListService(data.ToDoListDB{}))
+	lists := make(map[string]*models.ToDoList)
+	data := data.NewToDoListDB(lists)
+	service := service.NewToDoListService(data)
+	controller := controllers.NewController(service)
 
 	r := gin.New()
 
@@ -22,21 +25,21 @@ func SetupRoutes() {
 	r.Use(middlewares.InfoHandler())
 	r.Use(gin.Recovery())
 
-	r.GET("api/v2/lists", controller.GetAllListsController)
-	r.GET("api/v2/lists/:listid/todos", controller.GetAllToDosController)
+	r.GET("api/v2/lists", controller.GetAllLists)
+	r.GET("api/v2/lists/:listid/todos", controller.GetAllTodos)
 
-	r.GET("api/v2/lists/:listid", controller.GetListController)
-	r.POST("api/v2/lists", controller.CreateListController)
-	r.PATCH("api/v2/lists/:listid", controller.PatchListController)
-	r.DELETE("api/v2/lists/:listid", controller.DeleteListController)
+	r.GET("api/v2/lists/:listid", controller.GetList)
+	r.POST("api/v2/lists", controller.CreateList)
+	r.PATCH("api/v2/lists/:listid", controller.PatchList)
+	r.DELETE("api/v2/lists/:listid", controller.DeleteList)
 
-	r.GET("api/v2/todos/:todoid", controller.GetToDoController)
-	r.POST("api/v2/lists/:listid/todos", controller.CreateToDoController)
-	r.PATCH("api/v2/todos/:todoid", controller.PatchToDoController)
-	r.DELETE("api/v2/todos/:todoid", controller.DeleteToDoController)
+	r.GET("api/v2/todos/:todoid", controller.GetToDo)
+	r.POST("api/v2/lists/:listid/todos", controller.CreateToDo)
+	r.PATCH("api/v2/todos/:todoid", controller.PatchToDo)
+	r.DELETE("api/v2/todos/:todoid", controller.DeleteToDo)
 
 	// ruta sa vad intreaga structura de date. nu face parte din api
-	r.GET("api/v2/data-structure", controller.GetDataStructureController)
+	r.GET("api/v2/data-structure", controller.GetDataStructure)
 
 	if err := r.Run(); err != nil {
 		logs.ErrorLogger.Fatal().Msgf("Could not start the server due to: %s", err.Error())

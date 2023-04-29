@@ -7,7 +7,7 @@ type RequestBodyList struct {
 }
 
 type ResponseBodyList struct {
-	Id    string `json:"listid,omitempty"`
-	Owner string `json:"owner"`
-	Todos []ToDo `json:"todos"`
+	Id    string  `json:"listid,omitempty"`
+	Owner string  `json:"owner"`
+	Todos []*ToDo `json:"todos"`
 }

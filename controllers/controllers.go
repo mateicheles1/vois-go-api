@@ -19,21 +19,65 @@ func NewController(service service.ToDoListServiceInterface) *Controller {
 	}
 }
 
-func (c *Controller) GetAllListsController(ctx *gin.Context) {
-	lists, err := c.Service.GetAllLists()
+func (c *Controller) CreateList(ctx *gin.Context) {
+	var requestBody models.RequestBodyList
 
-	// am citit ca desi resursa e empty, se recomanda sa se foloseasca http status ok ca sa arate ca cererea a fost procesata cum trebuie si aditional un msg care sa spuna ca resursa e empty
-
-	if err != nil {
-		ctx.JSON(http.StatusOK, err.Error())
+	if err := ctx.BindJSON(&requestBody); err != nil {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, lists)
+	list, err := c.Service.CreateList(requestBody)
+
+	if err != nil {
+
+		if err.Error() == "empty owner" {
+			ctx.JSON(http.StatusBadRequest, "invalid JSON syntax in request body; empty owner")
+			return
+		}
+
+		if err.Error() != "empty owner" {
+			ctx.JSON(http.StatusInternalServerError, "something went wrong")
+			return
+		}
+	}
+
+	ctx.JSON(http.StatusCreated, list)
 }
 
-func (c *Controller) GetListController(ctx *gin.Context) {
-	list, err := c.Service.GetList(ctx.Param("listid"))
+func (c *Controller) CreateToDo(ctx *gin.Context) {
+	var requestBody models.ToDo
+
+	if err := ctx.BindJSON(&requestBody); err != nil {
+		return
+	}
+
+	listId := ctx.Param("listid")
+
+	todo, err := c.Service.CreateToDoInList(&requestBody, listId)
+
+	if err != nil {
+		if err.Error() == "empty content" {
+			ctx.JSON(http.StatusBadRequest, err.Error())
+			return
+		}
+
+		if err.Error() == "list not found" {
+			ctx.JSON(http.StatusNotFound, err.Error())
+			return
+		}
+	}
+
+	ctx.JSON(http.StatusCreated, todo)
+
+}
+
+func (c *Controller) GetList(ctx *gin.Context) {
+
+	var list *models.ResponseBodyList
+	var err error
+
+	listId := ctx.Param("listid")
+	list, err = c.Service.GetList(listId)
 
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, err.Error())
@@ -41,58 +85,15 @@ func (c *Controller) GetListController(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, list)
+
 }
 
-func (c *Controller) CreateListController(ctx *gin.Context) {
-	requestBody := new(models.RequestBodyList)
+func (c *Controller) GetToDo(ctx *gin.Context) {
+	todoId := ctx.Param("todoid")
+	var todo *models.ToDo
+	var err error
 
-	if err := ctx.BindJSON(requestBody); err != nil {
-		return
-	}
-
-	// in metodele din service pe create am zis sa returneze id-ul listei nou create si sa fie pusa in response header, in loc sa trimit intreaga resursa intr-un raspuns. din cate am inteles, rest api impune status code-ul created si un header cu locatia. resursa in body e optionala.
-
-	listId := c.Service.CreateList(requestBody)
-
-	ctx.Header("Location", fmt.Sprintf("/api/v2/lists/%s", listId))
-
-	ctx.Status(http.StatusCreated)
-}
-
-func (c *Controller) PatchListController(ctx *gin.Context) {
-	requestBody := new(models.ToDoList)
-
-	if err := ctx.BindJSON(requestBody); err != nil {
-		return
-	}
-
-	requestBody.Id = ctx.Param("listid")
-
-	err := c.Service.PatchList(requestBody)
-
-	if err != nil {
-		ctx.JSON(http.StatusNotFound, err.Error())
-		return
-	}
-
-	// la fel, din cate am inteles ramane la decizia developerului daca returneaza un http statusok sau nocontent pe operatiile de patch si delete si am ales no content. nu am reusit sa-mi dau seama care dintre ele este folosita cel mai des.
-
-	ctx.Status(http.StatusNoContent)
-}
-
-func (c *Controller) DeleteListController(ctx *gin.Context) {
-	err := c.Service.DeleteList(ctx.Param("listid"))
-
-	if err != nil {
-		ctx.JSON(http.StatusNotFound, err.Error())
-		return
-	}
-
-	ctx.Status(http.StatusNoContent)
-}
-
-func (c *Controller) GetToDoController(ctx *gin.Context) {
-	todo, err := c.Service.GetToDoInList(ctx.Param("todoid"))
+	todo, err = c.Service.GetToDoInList(todoId)
 
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, err.Error())
@@ -102,60 +103,24 @@ func (c *Controller) GetToDoController(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, todo)
 }
 
-func (c *Controller) DeleteToDoController(ctx *gin.Context) {
-	err := c.Service.DeleteToDoInList(ctx.Param("todoid"))
+func (c *Controller) GetAllLists(ctx *gin.Context) {
+	lists, message := c.Service.GetAllLists()
 
-	if err != nil {
-		ctx.JSON(http.StatusNotFound, err.Error())
+	fmt.Printf("Retrieved lists: %+v, message: %s\n", lists, message)
+
+	if message != "" {
+		ctx.JSON(http.StatusOK, message)
 		return
 	}
 
-	ctx.Status(http.StatusNoContent)
+	ctx.JSON(http.StatusOK, lists)
+
 }
 
-func (c *Controller) PatchToDoController(ctx *gin.Context) {
-	requestBody := new(models.ToDo)
+func (c *Controller) GetAllTodos(ctx *gin.Context) {
+	listId := ctx.Param("listid")
 
-	if err := ctx.BindJSON(requestBody); err != nil {
-		return
-	}
-
-	err := c.Service.PatchToDoInList(requestBody.Completed, ctx.Param("todoid"))
-
-	if err != nil {
-		ctx.JSON(http.StatusNotFound, err.Error())
-		return
-	}
-
-	ctx.Status(http.StatusNoContent)
-}
-
-func (c *Controller) CreateToDoController(ctx *gin.Context) {
-	requestBody := new(models.ToDo)
-
-	if err := ctx.BindJSON(requestBody); err != nil {
-		return
-	}
-
-	if requestBody.Content == "" {
-		ctx.JSON(http.StatusBadRequest, "content can't be empty")
-		return
-	}
-
-	id, err := c.Service.CreateToDoInList(ctx.Param("listid"), requestBody.Content)
-
-	if err != nil {
-		ctx.JSON(http.StatusNotFound, err.Error())
-		return
-	}
-
-	ctx.Header("Location", fmt.Sprintf("/api/v2/todos/%s", id))
-
-	ctx.Status(http.StatusCreated)
-}
-
-func (c *Controller) GetAllToDosController(ctx *gin.Context) {
-	todos, err := c.Service.GetAllToDosInList(ctx.Param("listid"))
+	todos, err := c.Service.GetAllTodos(listId)
 
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, err.Error())
@@ -165,11 +130,90 @@ func (c *Controller) GetAllToDosController(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, todos)
 }
 
-func (c *Controller) GetDataStructureController(ctx *gin.Context) {
-	dataStructure, err := c.Service.GetDataStructure()
+func (c *Controller) PatchList(ctx *gin.Context) {
+	var requestBody models.ToDoList
+
+	if err := ctx.BindJSON(&requestBody); err != nil {
+		return
+	}
+
+	listId := ctx.Param("listid")
+
+	list, err := c.Service.PatchList(&requestBody, listId)
 
 	if err != nil {
-		ctx.JSON(http.StatusOK, err.Error())
+		ctx.JSON(http.StatusNotFound, err.Error())
+		return
+	}
+
+	ctx.JSON(http.StatusOK, list)
+}
+
+func (c *Controller) PatchToDo(ctx *gin.Context) {
+	var requestBody models.ToDo
+
+	if err := ctx.BindJSON(&requestBody); err != nil {
+		return
+	}
+
+	todoId := ctx.Param("todoid")
+
+	todo, err := c.Service.PatchToDoInList(&requestBody, todoId)
+
+	if err != nil {
+
+		if err.Error() == "todo already completed" {
+			ctx.JSON(http.StatusBadRequest, err.Error())
+			return
+		}
+
+		if err.Error() == "todo already not completed" {
+			ctx.JSON(http.StatusBadRequest, err.Error())
+			return
+		}
+
+		if err.Error() == "todo not found" {
+			ctx.JSON(http.StatusNotFound, err.Error())
+			return
+		}
+
+	}
+
+	ctx.JSON(http.StatusOK, todo)
+}
+
+func (c *Controller) DeleteList(ctx *gin.Context) {
+	listId := ctx.Param("listid")
+
+	err := c.Service.DeleteList(listId)
+
+	if err != nil {
+		ctx.JSON(http.StatusNotFound, err.Error())
+		return
+	}
+
+	ctx.Status(http.StatusNoContent)
+
+}
+
+func (c *Controller) DeleteToDo(ctx *gin.Context) {
+	todoId := ctx.Param("todoid")
+
+	err := c.Service.DeleteToDoInList(todoId)
+
+	if err != nil {
+		ctx.JSON(http.StatusNotFound, err.Error())
+		return
+	}
+
+	ctx.Status(http.StatusNoContent)
+}
+
+func (c *Controller) GetDataStructure(ctx *gin.Context) {
+	dataStructure, message := c.Service.GetDataStructure()
+
+	if message != "" {
+		ctx.JSON(http.StatusOK, message)
 		return
 	}
 
