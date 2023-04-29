@@ -18,7 +18,7 @@ func ErrorHandler() gin.HandlerFunc {
 					Str("Method", ctx.Request.Method).
 					Str("Path", ctx.Request.URL.Path).
 					Int("Status code", http.StatusBadRequest).
-					Msgf("Bad request: %s", err.Error())
+					Msgf("Bad request: %s", err)
 
 				ctx.JSON(http.StatusBadRequest, err.Error())
 				return
@@ -29,7 +29,7 @@ func ErrorHandler() gin.HandlerFunc {
 					Str("Method", ctx.Request.Method).
 					Str("Path", ctx.Request.URL.Path).
 					Int("Status code", http.StatusInternalServerError).
-					Msgf("Internal server error: %s", err.Error())
+					Msgf("Internal server error: %s", err)
 
 				ctx.JSON(http.StatusInternalServerError, err.Error())
 				return
