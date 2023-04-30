@@ -13,7 +13,6 @@ import (
 
 func SetupRoutes() {
 
-	// controller-ul care primeste o implementare a interfetei care la randul ei, tot prin constructor function, primeste un struct de tip todolistdb. am ales sa fac asa ca sa pot schimba implementarea interfetei si orice instantare a struct-ului `ToDoListDB`, astfel utilizand dependency injection si loose coupling a diverselor componente din app.
 	lists := make(map[string]*models.ToDoList)
 	data := data.NewToDoListDB(lists)
 	service := service.NewToDoListService(data)
@@ -42,6 +41,6 @@ func SetupRoutes() {
 	r.GET("api/v2/data-structure", controller.GetDataStructure)
 
 	if err := r.Run(); err != nil {
-		logs.ErrorLogger.Fatal().Msgf("Could not start the server due to: %s", err.Error())
+		logs.ErrorLogger.Fatal().Msgf("Could not start the server due to: %s", err)
 	}
 }

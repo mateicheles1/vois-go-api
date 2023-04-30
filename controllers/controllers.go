@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"gogin-api/models"
 	"gogin-api/service"
 	"net/http"
@@ -40,6 +41,8 @@ func (c *Controller) CreateList(ctx *gin.Context) {
 		}
 	}
 
+	ctx.Header("Location", fmt.Sprintf("api/v2/lists/%s", list.Id))
+
 	ctx.JSON(http.StatusCreated, list)
 }
 
@@ -65,6 +68,8 @@ func (c *Controller) CreateToDo(ctx *gin.Context) {
 			return
 		}
 	}
+
+	ctx.Header("Location", fmt.Sprintf("api/v2/todos/%s", todo.Id))
 
 	ctx.JSON(http.StatusCreated, todo)
 
