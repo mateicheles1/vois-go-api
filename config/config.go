@@ -14,7 +14,7 @@ type Config struct {
 	Database string `json:"database"`
 }
 
-func (c *Config) ConnectionString() string {
+func (c Config) ConnectionString() string {
 	return fmt.Sprintf("host=%s port=%d user=%s password=%s database=%s", c.Host, c.Port, c.User, c.Password, c.Database)
 }
 
