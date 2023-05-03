@@ -1,6 +1,7 @@
 {
-  "server": {
-    "host": "localhost",
-    "port": 8000
-  }
+  "host": "localhost",
+  "port": 5432,
+  "user": "matthewias",
+  "password": "password",
+  "database": "todolists"
 }

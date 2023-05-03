@@ -31,7 +31,7 @@ func ErrorHandler() gin.HandlerFunc {
 					Int("Status code", http.StatusInternalServerError).
 					Msgf("Internal server error: %s", err)
 
-				ctx.JSON(http.StatusInternalServerError, err.Error())
+				ctx.JSON(http.StatusInternalServerError, "Something went wrong")
 				return
 			}
 

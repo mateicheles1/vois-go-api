@@ -16,133 +16,76 @@ func NewToDoListService(data data.ToDoListDBInterface) *ToDoListService {
 	}
 }
 
-func (s *ToDoListService) CreateList(requestBody models.RequestBodyList) (*models.ToDoList, error) {
+func (s *ToDoListService) GetLists() ([]*models.ToDoList, error) {
+
+	lists, err := s.db.GetLists()
+
+	for i := range lists {
+		for j := range lists[i].Todos {
+			lists[i].Todos[j].ListId = ""
+		}
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return lists, nil
+}
+
+func (s *ToDoListService) GetTodos(listId string) ([]*models.ToDo, error) {
+	todos, err := s.db.GetTodos(listId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for i := range todos {
+		todos[i].ListId = ""
+	}
+
+	return todos, nil
+}
+
+func (s *ToDoListService) CreateList(requestBody *models.RequestBodyList) (*models.ToDoList, error) {
 	if requestBody.Owner == "" {
 		return nil, errors.New("empty owner")
 	}
+
 	var todos []*models.ToDo
-	for _, stringContent := range requestBody.Todos {
-		newToDo := &models.ToDo{
-			Content: stringContent,
+
+	for _, todo := range requestBody.Todos {
+		dbToDo := &models.ToDo{
+			ListId:    requestBody.Id,
+			Content:   todo,
+			Completed: false,
 		}
 
-		todos = append(todos, newToDo)
+		todos = append(todos, dbToDo)
 	}
 
-	list, err := s.db.CreateList(requestBody.Owner, todos)
+	requestBody.Todos = nil
+
+	createdList, err := s.db.CreateList(requestBody, todos)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return list, nil
-}
-
-func (s *ToDoListService) CreateToDoInList(requestBody *models.ToDo, listId string) (*models.ToDo, error) {
-
-	if requestBody.Content == "" {
-		return nil, errors.New("empty content")
-	}
-
-	todo, err := s.db.CreateToDoInList(requestBody, listId)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return todo, nil
+	return createdList, nil
 
 }
 
-func (s *ToDoListService) GetList(listId string) (*models.ResponseBodyList, error) {
+func (s *ToDoListService) GetList(listId string) (*models.ToDoList, error) {
 	list, err := s.db.GetList(listId)
-	var todos []*models.ToDo
 
-	if err != nil {
-		return nil, err
-	}
-
-	for _, todo := range list.Todos {
-		newToDo := &models.ToDo{
+	for i, todo := range list.Todos {
+		list.Todos[i] = &models.ToDo{
 			Id:        todo.Id,
 			Content:   todo.Content,
 			Completed: todo.Completed,
 		}
-
-		todos = append(todos, newToDo)
 	}
-
-	return &models.ResponseBodyList{
-		Owner: list.Owner,
-		Todos: todos,
-	}, nil
-}
-
-func (s *ToDoListService) GetToDoInList(id string) (*models.ToDo, error) {
-	todo, err := s.db.GetToDoInList(id)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return todo, nil
-}
-
-func (s *ToDoListService) GetAllLists() ([]models.ResponseBodyList, string) {
-
-	var responseLists []models.ResponseBodyList
-
-	lists, message := s.db.GetAllLists()
-
-	for _, list := range lists {
-		todos, _ := s.GetAllTodos(list.Id)
-		reponseList := models.ResponseBodyList{
-			Id:    list.Id,
-			Owner: list.Owner,
-			Todos: todos,
-		}
-
-		responseLists = append(responseLists, reponseList)
-	}
-
-	if message != "" {
-		return nil, message
-	}
-
-	return responseLists, ""
-
-}
-
-func (s *ToDoListService) GetAllTodos(listId string) ([]*models.ToDo, error) {
-	todos, err := s.db.GetAllTodos(listId)
-
-	var responseTodos []*models.ToDo
-
-	if err != nil {
-		return nil, err
-	}
-
-	for _, todo := range todos {
-		responseToDo := &models.ToDo{
-			Id:        todo.Id,
-			Content:   todo.Content,
-			Completed: todo.Completed,
-		}
-
-		responseTodos = append(responseTodos, responseToDo)
-	}
-
-	return responseTodos, nil
-
-}
-
-func (s *ToDoListService) PatchList(requestBody *models.ToDoList, listId string) (*models.ToDoList, error) {
-
-	if requestBody.Owner == "" {
-		return nil, errors.New("invalid JSON syntax in request body; empty owner")
-	}
-
-	list, err := s.db.PatchList(requestBody.Owner, listId)
 
 	if err != nil {
 		return nil, err
@@ -151,14 +94,26 @@ func (s *ToDoListService) PatchList(requestBody *models.ToDoList, listId string)
 	return list, nil
 }
 
-func (s *ToDoListService) PatchToDoInList(requestBody *models.ToDo, todoId string) (*models.ToDo, error) {
-	todo, err := s.db.PatchToDoInList(requestBody.Completed, todoId)
+func (s *ToDoListService) PatchList(reqBody *models.RequestBodyList, listId string) (*models.ToDoList, error) {
+	if reqBody.Owner == "" {
+		return nil, errors.New("empty owner")
+	}
+
+	list, err := s.db.PatchList(reqBody, listId)
+
+	for i, v := range list.Todos {
+		list.Todos[i] = &models.ToDo{
+			Id:        v.Id,
+			Content:   v.Content,
+			Completed: v.Completed,
+		}
+	}
 
 	if err != nil {
 		return nil, err
 	}
 
-	return todo, nil
+	return list, nil
 }
 
 func (s *ToDoListService) DeleteList(listId string) error {
@@ -171,22 +126,52 @@ func (s *ToDoListService) DeleteList(listId string) error {
 	return nil
 }
 
-func (s *ToDoListService) DeleteToDoInList(todoId string) error {
-	err := s.db.DeleteToDoInList(todoId)
+func (s *ToDoListService) CreateTodo(reqBody *models.ToDo, listId string) (*models.ToDo, error) {
+	if reqBody.Content == "" {
+		return nil, errors.New("empty content")
+	}
+
+	todo, err := s.db.CreateTodo(reqBody, listId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return todo, nil
+}
+
+func (s *ToDoListService) GetTodo(todoId string) (*models.ToDo, error) {
+	todo, err := s.db.GetTodo(todoId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	responseTodo := &models.ToDo{
+		ListId:    todo.ListId,
+		Content:   todo.Content,
+		Completed: todo.Completed,
+	}
+
+	return responseTodo, nil
+}
+
+func (s *ToDoListService) PatchTodo(reqBody *models.ToDo, todoId string) (*models.ToDo, error) {
+	todo, err := s.db.PatchTodo(reqBody, todoId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return todo, nil
+}
+
+func (s *ToDoListService) DeleteTodo(todoId string) error {
+	err := s.db.DeleteTodo(todoId)
 
 	if err != nil {
 		return err
 	}
 
 	return nil
-}
-
-func (s *ToDoListService) GetDataStructure() (map[string]*models.ToDoList, string) {
-	data, message := s.db.GetDataStructure()
-
-	if message != "" {
-		return nil, message
-	}
-
-	return data, ""
 }

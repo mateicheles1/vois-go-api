@@ -1,31 +1,26 @@
-package main
+package data
 
 import (
 	"gogin-api/config"
 	"gogin-api/initializers"
 	"gogin-api/logs"
-	"gogin-api/routes"
 
 	"gorm.io/gorm"
 )
 
-var DB *gorm.DB
-
-func init() {
+func ReturnDB() *gorm.DB {
 	config, err := config.LoadConfig("./config/config.json")
 
 	if err != nil {
-		logs.ErrorLogger.Error().Msgf("Could not load config: %s", err)
-		return
+		logs.ErrorLogger.Fatal().Msgf("Could not load config: %s", err)
+		return nil
 	}
 
 	db, err := initializers.OpenDB(config)
 	if err != nil {
 		logs.ErrorLogger.Fatal().Msgf("Could not connect to db: %s", err)
+		return nil
 	}
-	DB = db
-}
 
-func main() {
-	routes.SetupRoutes()
+	return db
 }

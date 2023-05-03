@@ -1,12 +1,14 @@
 package controllers
 
 import (
+	"errors"
 	"fmt"
 	"gogin-api/models"
 	"gogin-api/service"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type Controller struct {
@@ -19,164 +21,106 @@ func NewController(service service.ToDoListServiceInterface) *Controller {
 	}
 }
 
-func (c *Controller) CreateList(ctx *gin.Context) {
-	var requestBody models.RequestBodyList
+func (c *Controller) GetLists(ctx *gin.Context) {
+	lists, err := c.Service.GetLists()
 
-	if err := ctx.BindJSON(&requestBody); err != nil {
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
-	list, err := c.Service.CreateList(requestBody)
+	ctx.JSON(http.StatusOK, lists)
+}
+
+func (c *Controller) GetTodos(ctx *gin.Context) {
+
+	listId := ctx.Param("listid")
+
+	todos, err := c.Service.GetTodos(listId)
 
 	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			ctx.JSON(http.StatusNotFound, "list not found")
+			return
+		}
+
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, todos)
+
+}
+
+func (c *Controller) CreateList(ctx *gin.Context) {
+	var reqBody models.RequestBodyList
+
+	if err := ctx.BindJSON(&reqBody); err != nil {
+		return
+	}
+
+	list, err := c.Service.CreateList(&reqBody)
+
+	if err != nil {
+		if err.Error() == "empty owner" {
+			ctx.AbortWithError(http.StatusBadRequest, err)
+			return
+		}
+
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	ctx.Header("Location", fmt.Sprintf("/api/v2/lists/%s", list.Id))
+
+	ctx.JSON(http.StatusCreated, list)
+}
+
+func (c *Controller) GetList(ctx *gin.Context) {
+	listId := ctx.Param("listid")
+
+	list, err := c.Service.GetList(listId)
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			ctx.JSON(http.StatusNotFound, "list not found")
+			return
+		}
+
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, list)
+}
+
+func (c *Controller) PatchList(ctx *gin.Context) {
+	var reqBody models.RequestBodyList
+
+	if err := ctx.BindJSON(&reqBody); err != nil {
+		return
+	}
+
+	listId := ctx.Param("listid")
+
+	list, err := c.Service.PatchList(&reqBody, listId)
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			ctx.JSON(http.StatusNotFound, "list not found")
+			return
+		}
 
 		if err.Error() == "empty owner" {
 			ctx.AbortWithError(http.StatusBadRequest, err)
 			return
 		}
 
-		if err.Error() != "empty owner" {
-			ctx.AbortWithError(http.StatusInternalServerError, err)
-			return
-		}
-	}
-
-	ctx.Header("Location", fmt.Sprintf("api/v2/lists/%s", list.Id))
-
-	ctx.JSON(http.StatusCreated, list)
-}
-
-func (c *Controller) CreateToDo(ctx *gin.Context) {
-	var requestBody models.ToDo
-
-	if err := ctx.BindJSON(&requestBody); err != nil {
-		return
-	}
-
-	listId := ctx.Param("listid")
-
-	todo, err := c.Service.CreateToDoInList(&requestBody, listId)
-
-	if err != nil {
-		if err.Error() == "empty content" {
-			ctx.AbortWithError(http.StatusBadRequest, err)
-			return
-		}
-
-		if err.Error() == "list not found" {
-			ctx.JSON(http.StatusNotFound, err.Error())
-			return
-		}
-	}
-
-	ctx.Header("Location", fmt.Sprintf("api/v2/todos/%s", todo.Id))
-
-	ctx.JSON(http.StatusCreated, todo)
-
-}
-
-func (c *Controller) GetList(ctx *gin.Context) {
-
-	listId := ctx.Param("listid")
-	list, err := c.Service.GetList(listId)
-
-	if err != nil {
-		ctx.JSON(http.StatusNotFound, err.Error())
+		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
 	ctx.JSON(http.StatusOK, list)
-
-}
-
-func (c *Controller) GetToDo(ctx *gin.Context) {
-	todoId := ctx.Param("todoid")
-
-	todo, err := c.Service.GetToDoInList(todoId)
-
-	if err != nil {
-		ctx.JSON(http.StatusNotFound, err.Error())
-		return
-	}
-
-	ctx.JSON(http.StatusOK, todo)
-}
-
-func (c *Controller) GetAllLists(ctx *gin.Context) {
-	lists, message := c.Service.GetAllLists()
-
-	if message != "" {
-		ctx.JSON(http.StatusOK, message)
-		return
-	}
-
-	ctx.JSON(http.StatusOK, lists)
-
-}
-
-func (c *Controller) GetAllTodos(ctx *gin.Context) {
-	listId := ctx.Param("listid")
-
-	todos, err := c.Service.GetAllTodos(listId)
-
-	if err != nil {
-		ctx.JSON(http.StatusNotFound, err.Error())
-		return
-	}
-
-	ctx.JSON(http.StatusOK, todos)
-}
-
-func (c *Controller) PatchList(ctx *gin.Context) {
-	var requestBody models.ToDoList
-
-	if err := ctx.BindJSON(&requestBody); err != nil {
-		return
-	}
-
-	listId := ctx.Param("listid")
-
-	list, err := c.Service.PatchList(&requestBody, listId)
-
-	if err != nil {
-		ctx.JSON(http.StatusNotFound, err.Error())
-		return
-	}
-
-	ctx.JSON(http.StatusOK, list)
-}
-
-func (c *Controller) PatchToDo(ctx *gin.Context) {
-	var requestBody models.ToDo
-
-	if err := ctx.BindJSON(&requestBody); err != nil {
-		return
-	}
-
-	todoId := ctx.Param("todoid")
-
-	todo, err := c.Service.PatchToDoInList(&requestBody, todoId)
-
-	if err != nil {
-
-		if err.Error() == "todo already completed" {
-			ctx.AbortWithError(http.StatusBadRequest, err)
-			return
-		}
-
-		if err.Error() == "todo already not completed" {
-			ctx.AbortWithError(http.StatusBadRequest, err)
-			return
-		}
-
-		if err.Error() == "todo not found" {
-			ctx.JSON(http.StatusNotFound, err.Error())
-			return
-		}
-
-	}
-
-	ctx.JSON(http.StatusOK, todo)
 }
 
 func (c *Controller) DeleteList(ctx *gin.Context) {
@@ -185,34 +129,107 @@ func (c *Controller) DeleteList(ctx *gin.Context) {
 	err := c.Service.DeleteList(listId)
 
 	if err != nil {
-		ctx.JSON(http.StatusNotFound, err.Error())
-		return
+		if err == gorm.ErrRecordNotFound {
+			ctx.JSON(http.StatusNotFound, "list not found")
+			return
+		}
+		ctx.AbortWithError(http.StatusInternalServerError, err)
 	}
 
 	ctx.Status(http.StatusNoContent)
-
 }
 
-func (c *Controller) DeleteToDo(ctx *gin.Context) {
-	todoId := ctx.Param("todoid")
+func (c *Controller) CreateTodo(ctx *gin.Context) {
+	listId := ctx.Param("listid")
+	var reqBody models.ToDo
 
-	err := c.Service.DeleteToDoInList(todoId)
+	if err := ctx.BindJSON(&reqBody); err != nil {
+		return
+	}
+
+	todo, err := c.Service.CreateTodo(&reqBody, listId)
 
 	if err != nil {
-		ctx.JSON(http.StatusNotFound, err.Error())
+		if err == gorm.ErrRecordNotFound {
+			ctx.JSON(http.StatusNotFound, "list not found")
+			return
+		}
+
+		if err.Error() == "empty content" {
+			ctx.AbortWithError(http.StatusBadRequest, err)
+			return
+		}
+
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	ctx.Header("Location", fmt.Sprintf("api/v2/todos/%s", todo.Id))
+
+	ctx.JSON(http.StatusCreated, todo)
+}
+
+func (c *Controller) GetTodo(ctx *gin.Context) {
+	todoId := ctx.Param("todoid")
+
+	todo, err := c.Service.GetTodo(todoId)
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			ctx.JSON(http.StatusNotFound, "todo not found")
+			return
+		}
+
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, todo)
+}
+
+func (c *Controller) PatchTodo(ctx *gin.Context) {
+
+	var reqBody models.ToDo
+
+	if err := ctx.BindJSON(&reqBody); err != nil {
+		return
+	}
+
+	todoId := ctx.Param("todoid")
+
+	todo, err := c.Service.PatchTodo(&reqBody, todoId)
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			ctx.JSON(http.StatusNotFound, "todo not found")
+		}
+
+		if err.Error() == "todo already completed" {
+			ctx.AbortWithError(http.StatusBadRequest, err)
+			return
+		}
+
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, todo)
+}
+
+func (c *Controller) DeleteTodo(ctx *gin.Context) {
+	todoId := ctx.Param("todoid")
+
+	err := c.Service.DeleteTodo(todoId)
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			ctx.JSON(http.StatusNotFound, "todo not found")
+			return
+		}
+
+		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
 	ctx.Status(http.StatusNoContent)
-}
-
-func (c *Controller) GetDataStructure(ctx *gin.Context) {
-	dataStructure, message := c.Service.GetDataStructure()
-
-	if message != "" {
-		ctx.JSON(http.StatusOK, message)
-		return
-	}
-
-	ctx.JSON(http.StatusOK, dataStructure)
 }

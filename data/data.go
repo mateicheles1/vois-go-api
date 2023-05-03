@@ -2,169 +2,227 @@ package data
 
 import (
 	"errors"
-	"fmt"
 	"gogin-api/models"
 
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type ToDoListDB struct {
-	Lists map[string]*models.ToDoList
+	Lists *gorm.DB
 }
 
-func NewToDoListDB(lists map[string]*models.ToDoList) *ToDoListDB {
+func NewToDoListDB(db *gorm.DB) *ToDoListDB {
 	return &ToDoListDB{
-		Lists: lists,
+		Lists: db,
 	}
 }
 
-func (db *ToDoListDB) CreateList(owner string, todos []*models.ToDo) (*models.ToDoList, error) {
+func (db *ToDoListDB) CreateList(reqBody *models.RequestBodyList, todos []*models.ToDo) (*models.ToDoList, error) {
+	listId := uuid.New().String()
+	reqBody.Id = listId
 
-	if db.Lists == nil {
-		db.Lists = make(map[string]*models.ToDoList)
+	dbList := models.ToDoList{
+		Id:    listId,
+		Owner: reqBody.Owner,
 	}
 
-	listKey := uuid.New().String()
-	todosMap := make(map[string]*models.ToDo)
-
-	for _, todo := range todos {
-		todoKey := uuid.New().String()
-		todo.Id = todoKey
-		todo.ListId = listKey
-		todo.Completed = false
-		todosMap[todoKey] = todo
+	for i := range todos {
+		todoId := uuid.New().String()
+		todos[i].Id = todoId
+		dbList.Todos = append(dbList.Todos, todos[i])
 	}
 
-	db.Lists[listKey] = &models.ToDoList{
-		Id:    listKey,
-		Owner: owner,
-		Todos: todosMap,
+	err := db.Lists.Create(&dbList).Error
+	if err != nil {
+		return nil, err
 	}
 
-	return db.Lists[listKey], nil
-}
+	resBodyList := &models.ToDoList{
+		Id:    dbList.Id,
+		Owner: dbList.Owner,
+		Todos: make([]*models.ToDo, len(dbList.Todos)),
+	}
 
-func (db *ToDoListDB) CreateToDoInList(todo *models.ToDo, listId string) (*models.ToDo, error) {
-
-	if _, hasList := db.Lists[listId]; hasList {
-
-		todoKey := uuid.New().String()
-		newToDo := &models.ToDo{
-			Id:        todoKey,
-			ListId:    listId,
+	for i, todo := range dbList.Todos {
+		resBodyList.Todos[i] = &models.ToDo{
+			Id:        todo.Id,
 			Content:   todo.Content,
-			Completed: false,
+			Completed: todo.Completed,
 		}
-		db.Lists[listId].Todos[todoKey] = newToDo
-		return newToDo, nil
 	}
 
-	return nil, errors.New("list not found")
+	return resBodyList, nil
 }
 
 func (db *ToDoListDB) GetList(listId string) (*models.ToDoList, error) {
-	if _, hasList := db.Lists[listId]; hasList {
-		return db.Lists[listId], nil
+	var list models.ToDoList
 
-	}
-
-	return nil, errors.New("list not found")
-}
-
-func (db *ToDoListDB) GetToDoInList(id string) (*models.ToDo, error) {
-	for _, list := range db.Lists {
-		if todo, hasToDo := list.Todos[id]; hasToDo {
-			return &models.ToDo{
-				ListId:    list.Id,
-				Content:   todo.Content,
-				Completed: todo.Completed,
-			}, nil
+	result := db.Lists.Preload("Todos").First(&list, "id = ?", listId)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, gorm.ErrRecordNotFound
 		}
+		return nil, result.Error
 	}
 
-	return nil, errors.New("todo not found")
+	return &list, nil
 }
 
-func (db *ToDoListDB) GetAllLists() ([]models.ToDoList, string) {
-	fmt.Printf("lists: %v", db.Lists)
-	var lists []models.ToDoList
+func (db *ToDoListDB) GetLists() ([]*models.ToDoList, error) {
+	var lists []*models.ToDoList
 
-	for _, list := range db.Lists {
-		lists = append(lists, *list)
+	result := db.Lists.Preload("Todos").Find(&lists)
+
+	if result.Error != nil {
+		return nil, result.Error
 	}
 
-	if len(lists) == 0 {
-		return nil, "no content"
-	}
-
-	return lists, ""
-
+	return lists, nil
 }
 
-func (db *ToDoListDB) GetAllTodos(listId string) ([]*models.ToDo, error) {
-	if _, hasList := db.Lists[listId]; hasList {
-		var todos []*models.ToDo
-		for _, todo := range db.Lists[listId].Todos {
-			todos = append(todos, todo)
+func (db *ToDoListDB) GetTodos(listId string) ([]*models.ToDo, error) {
+	var todos []*models.ToDo
+
+	result := db.Lists.Find(&todos, "list_id = ?", listId)
+
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, gorm.ErrRecordNotFound
 		}
-		return todos, nil
+
+		return nil, result.Error
 	}
 
-	return nil, errors.New("list not found")
+	return todos, nil
 }
 
-func (db *ToDoListDB) PatchList(owner string, listId string) (*models.ToDoList, error) {
-	if _, hasList := db.Lists[listId]; hasList {
-		db.Lists[listId].Owner = owner
-		return db.Lists[listId], nil
-	}
+func (db *ToDoListDB) PatchList(reqBody *models.RequestBodyList, listId string) (*models.ToDoList, error) {
 
-	return nil, errors.New("list not found")
-}
+	var list models.ToDoList
 
-func (db *ToDoListDB) PatchToDoInList(isCompleted bool, todoId string) (*models.ToDo, error) {
-	for _, list := range db.Lists {
-		if todo, hasToDo := list.Todos[todoId]; hasToDo {
-			if todo.Completed && isCompleted {
-				return nil, errors.New("todo already completed")
-			}
+	result := db.Lists.Preload("Todos").First(&list, "id = ?", listId)
 
-			if !todo.Completed && !isCompleted {
-				return nil, errors.New("todo already not completed")
-			}
-
-			list.Todos[todoId].Completed = isCompleted
-			return list.Todos[todoId], nil
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, gorm.ErrRecordNotFound
 		}
+		return nil, result.Error
 	}
 
-	return nil, errors.New("todo not found")
+	list.Owner = reqBody.Owner
+
+	if err := db.Lists.Save(&list).Error; err != nil {
+		return nil, err
+	}
+
+	return &list, nil
 }
 
 func (db *ToDoListDB) DeleteList(listId string) error {
-	if _, hasList := db.Lists[listId]; hasList {
-		delete(db.Lists, listId)
-		return nil
-	}
 
-	return errors.New("list not found")
-}
+	var list models.ToDoList
 
-func (db *ToDoListDB) DeleteToDoInList(todoId string) error {
-	for k, list := range db.Lists {
-		if _, hasToDo := list.Todos[todoId]; hasToDo {
-			delete(db.Lists[k].Todos, todoId)
-			return nil
+	result := db.Lists.First(&list, "id = ?", listId)
+
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return gorm.ErrRecordNotFound
 		}
+
+		return result.Error
 	}
 
-	return errors.New("todo not found")
+	if err := db.Lists.Delete(&list).Error; err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func (db *ToDoListDB) GetDataStructure() (map[string]*models.ToDoList, string) {
-	if len(db.Lists) == 0 {
-		return nil, "no content"
+func (db *ToDoListDB) CreateTodo(reqBody *models.ToDo, listId string) (*models.ToDo, error) {
+
+	result := db.Lists.First(&models.ToDoList{}, "id = ?", listId)
+
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, gorm.ErrRecordNotFound
+		}
+
+		return nil, result.Error
 	}
 
-	return db.Lists, ""
+	todo := &models.ToDo{
+		Id:        uuid.New().String(),
+		ListId:    listId,
+		Content:   reqBody.Content,
+		Completed: false,
+	}
+
+	result = db.Lists.Create(todo)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return todo, nil
+
+}
+
+func (db *ToDoListDB) GetTodo(todoId string) (*models.ToDo, error) {
+	var todo models.ToDo
+
+	result := db.Lists.First(&todo, "id = ?", todoId)
+
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, gorm.ErrRecordNotFound
+		}
+
+		return nil, result.Error
+	}
+
+	return &todo, nil
+}
+
+func (db *ToDoListDB) PatchTodo(reqBody *models.ToDo, todoId string) (*models.ToDo, error) {
+	var todo models.ToDo
+
+	result := db.Lists.First(&todo, "id = ?", todoId)
+
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, gorm.ErrRecordNotFound
+		}
+
+		return nil, result.Error
+	}
+
+	todo.Completed = reqBody.Completed
+
+	if err := db.Lists.Save(&todo).Error; err != nil {
+		return nil, err
+	}
+
+	return &todo, nil
+}
+
+func (db *ToDoListDB) DeleteTodo(todoId string) error {
+	var todo models.ToDo
+
+	result := db.Lists.First(&todo, "id = ?", todoId)
+
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return gorm.ErrRecordNotFound
+		}
+
+		return result.Error
+	}
+
+	if err := db.Lists.Delete(&todo).Error; err != nil {
+		return err
+	}
+
+	return nil
 }

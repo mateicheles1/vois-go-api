@@ -1,19 +1,23 @@
 package initializers
 
 import (
+	"gogin-api/config"
 	"gogin-api/logs"
-	"os"
+	"gogin-api/models"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-var DB *gorm.DB
+func OpenDB(config *config.Config) (*gorm.DB, error) {
+	db, err := gorm.Open(postgres.Open(config.ConnectionString()), &gorm.Config{})
 
-func ConnectToDB() {
-	var err error
-	dsn := os.Getenv("DB_URL")
-	if DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{}); err != nil {
-		logs.ErrorLogger.Fatal().Msgf("Failed to connect to database due to: %s", err.Error())
+	if err != nil {
+		return nil, err
 	}
+
+	if err = db.AutoMigrate(&models.ToDoList{}, &models.ToDo{}); err != nil {
+		logs.ErrorLogger.Fatal().Msgf("Failed to migrate: %s", err)
+	}
+	return db, nil
 }
