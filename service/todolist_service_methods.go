@@ -79,6 +79,8 @@ func (s *ToDoListService) CreateList(requestBody *models.RequestBodyList) (*mode
 func (s *ToDoListService) GetList(listId string) (*models.ToDoList, error) {
 	list, err := s.db.GetList(listId)
 
+	list.Id = ""
+
 	for i, todo := range list.Todos {
 		list.Todos[i] = &models.ToDo{
 			Id:        todo.Id,

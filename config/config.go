@@ -3,10 +3,15 @@ package config
 import (
 	"encoding/json"
 	"fmt"
+	"gogin-api/logs"
 	"os"
 )
 
-type Config struct {
+type ServerConfig struct {
+	Host string `json:"host"`
+	Port string `json:"port"`
+}
+type DBConfig struct {
 	Host     string `json:"host"`
 	Port     int    `json:"port"`
 	User     string `json:"user"`
@@ -14,16 +19,22 @@ type Config struct {
 	Database string `json:"database"`
 }
 
-func (c Config) ConnectionString() string {
+type Config struct {
+	Server ServerConfig `json:"server"`
+	DB     DBConfig     `json:"database"`
+}
+
+func (c DBConfig) ConnectionString() string {
 	return fmt.Sprintf("host=%s port=%d user=%s password=%s database=%s", c.Host, c.Port, c.User, c.Password, c.Database)
 }
 
-func LoadConfig(configFilePath string) (*Config, error) {
+func NewConfig(configFilePath string) *Config {
 
 	file, err := os.Open(configFilePath)
 
 	if err != nil {
-		return nil, err
+		logs.ErrorLogger.Error().Msgf("Error opening config file: %s", err)
+		return nil
 	}
 
 	defer file.Close()
@@ -31,8 +42,9 @@ func LoadConfig(configFilePath string) (*Config, error) {
 	var config Config
 
 	if err := json.NewDecoder(file).Decode(&config); err != nil {
-		return nil, err
+		logs.ErrorLogger.Error().Msgf("Error unmarshaling json into config: %s", err)
+		return nil
 	}
 
-	return &config, nil
+	return &config
 }

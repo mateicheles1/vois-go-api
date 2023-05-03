@@ -9,15 +9,9 @@ import (
 	"gorm.io/gorm"
 )
 
-func ConnectToDB() *gorm.DB {
-	config, err := config.LoadConfig("./config/config.json")
+func ConnectToDB(config *config.Config) *gorm.DB {
 
-	if err != nil {
-		logs.ErrorLogger.Error().Msgf("Could not load config due to: %s", err)
-		return nil
-	}
-
-	db, err := gorm.Open(postgres.Open(config.ConnectionString()), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(config.DB.ConnectionString()), &gorm.Config{})
 
 	if err != nil {
 		logs.ErrorLogger.Fatal().Msgf("Could not connect to DB due to: %s", err)

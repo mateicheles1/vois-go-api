@@ -1,18 +1,21 @@
 package routes
 
 import (
+	"fmt"
 	"gogin-api/controllers"
 	"gogin-api/data"
 	"gogin-api/logs"
 	"gogin-api/middlewares"
 	"gogin-api/service"
 
+	"gogin-api/config"
+
 	"github.com/gin-gonic/gin"
 )
 
 func SetupRoutes() {
-
-	data := data.NewToDoListDB(data.ConnectToDB())
+	config := config.NewConfig("./config/config.json")
+	data := data.NewToDoListDB(data.ConnectToDB(config))
 	service := service.NewToDoListService(data)
 	controller := controllers.NewController(service)
 
@@ -35,7 +38,7 @@ func SetupRoutes() {
 	r.PATCH("api/v2/todos/:todoid", controller.PatchTodo)
 	r.DELETE("api/v2/todos/:todoid", controller.DeleteTodo)
 
-	if err := r.Run(":8080"); err != nil {
+	if err := r.Run(fmt.Sprintf("%s:%s", config.Server.Host, config.Server.Port)); err != nil {
 		logs.ErrorLogger.Fatal().Msgf("Could not start the server due to: %s", err)
 	}
 }
