@@ -7,6 +7,11 @@ import (
 	"os"
 )
 
+type Config struct {
+	Server ServerConfig `json:"server"`
+	DB     DBConfig     `json:"database"`
+}
+
 type ServerConfig struct {
 	Host string `json:"host"`
 	Port string `json:"port"`
@@ -17,11 +22,6 @@ type DBConfig struct {
 	User     string `json:"user"`
 	Password string `json:"password"`
 	Database string `json:"database"`
-}
-
-type Config struct {
-	Server ServerConfig `json:"server"`
-	DB     DBConfig     `json:"database"`
 }
 
 func (c DBConfig) ConnectionString() string {
