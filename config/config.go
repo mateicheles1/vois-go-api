@@ -29,11 +29,8 @@ func LoadConfig(configFilePath string) (*Config, error) {
 	defer file.Close()
 
 	var config Config
-	decoder := json.NewDecoder(file)
 
-	err = decoder.Decode(&config)
-
-	if err != nil {
+	if err := json.NewDecoder(file).Decode(&config); err != nil {
 		return nil, err
 	}
 
