@@ -34,7 +34,6 @@ func ErrorHandler() gin.HandlerFunc {
 				ctx.JSON(http.StatusInternalServerError, "Something went wrong")
 				return
 			}
-
 		}
 	}
 }

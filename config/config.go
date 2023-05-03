@@ -18,9 +18,9 @@ func (c *Config) ConnectionString() string {
 	return fmt.Sprintf("host=%s port=%d user=%s password=%s database=%s", c.Host, c.Port, c.User, c.Password, c.Database)
 }
 
-func LoadConfig(configFile string) (*Config, error) {
+func LoadConfig(configFilePath string) (*Config, error) {
 
-	file, err := os.Open(configFile)
+	file, err := os.Open(configFilePath)
 
 	if err != nil {
 		return nil, err

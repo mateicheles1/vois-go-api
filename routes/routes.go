@@ -12,7 +12,7 @@ import (
 
 func SetupRoutes() {
 
-	data := data.NewToDoListDB(data.ReturnDB())
+	data := data.NewToDoListDB(data.ConnectToDB())
 	service := service.NewToDoListService(data)
 	controller := controllers.NewController(service)
 

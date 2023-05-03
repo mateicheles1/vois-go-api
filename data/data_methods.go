@@ -20,20 +20,18 @@ func NewToDoListDB(db *gorm.DB) *ToDoListDB {
 
 func (db *ToDoListDB) CreateList(reqBody *models.RequestBodyList, todos []*models.ToDo) (*models.ToDoList, error) {
 	listId := uuid.New().String()
-	reqBody.Id = listId
-
 	dbList := models.ToDoList{
 		Id:    listId,
 		Owner: reqBody.Owner,
 	}
 
 	for i := range todos {
-		todoId := uuid.New().String()
-		todos[i].Id = todoId
+		todos[i].Id = uuid.New().String()
 		dbList.Todos = append(dbList.Todos, todos[i])
 	}
 
 	err := db.Lists.Create(&dbList).Error
+
 	if err != nil {
 		return nil, err
 	}
