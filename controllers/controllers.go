@@ -34,9 +34,7 @@ func (c *Controller) GetLists(ctx *gin.Context) {
 
 func (c *Controller) GetTodos(ctx *gin.Context) {
 
-	listId := ctx.Param("listid")
-
-	todos, err := c.Service.GetTodos(listId)
+	todos, err := c.Service.GetTodos(ctx.Param("listid"))
 
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -55,6 +53,16 @@ func (c *Controller) GetTodos(ctx *gin.Context) {
 func (c *Controller) CreateList(ctx *gin.Context) {
 	var reqBody models.RequestBodyList
 
+	if reqBody.Owner == "" {
+		ctx.JSON(http.StatusBadRequest, "Empty owner")
+		return
+	}
+
+	if len(reqBody.Todos) == 0 {
+		ctx.JSON(http.StatusBadRequest, "Empty todos")
+		return
+	}
+
 	if err := ctx.BindJSON(&reqBody); err != nil {
 		return
 	}
@@ -62,11 +70,6 @@ func (c *Controller) CreateList(ctx *gin.Context) {
 	list, err := c.Service.CreateList(&reqBody)
 
 	if err != nil {
-		if err.Error() == "empty owner" {
-			ctx.AbortWithError(http.StatusBadRequest, err)
-			return
-		}
-
 		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
@@ -77,9 +80,8 @@ func (c *Controller) CreateList(ctx *gin.Context) {
 }
 
 func (c *Controller) GetList(ctx *gin.Context) {
-	listId := ctx.Param("listid")
 
-	list, err := c.Service.GetList(listId)
+	list, err := c.Service.GetList(ctx.Param("listid"))
 
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -101,18 +103,16 @@ func (c *Controller) PatchList(ctx *gin.Context) {
 		return
 	}
 
-	listId := ctx.Param("listid")
+	if reqBody.Owner == "" {
+		ctx.JSON(http.StatusBadRequest, "Empty owner")
+		return
+	}
 
-	list, err := c.Service.PatchList(&reqBody, listId)
+	list, err := c.Service.PatchList(&reqBody, ctx.Param("listid"))
 
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			ctx.JSON(http.StatusNotFound, "list not found")
-			return
-		}
-
-		if err.Error() == "empty owner" {
-			ctx.AbortWithError(http.StatusBadRequest, err)
 			return
 		}
 
@@ -124,9 +124,8 @@ func (c *Controller) PatchList(ctx *gin.Context) {
 }
 
 func (c *Controller) DeleteList(ctx *gin.Context) {
-	listId := ctx.Param("listid")
 
-	err := c.Service.DeleteList(listId)
+	err := c.Service.DeleteList(ctx.Param("listid"))
 
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -140,23 +139,22 @@ func (c *Controller) DeleteList(ctx *gin.Context) {
 }
 
 func (c *Controller) CreateTodo(ctx *gin.Context) {
-	listId := ctx.Param("listid")
 	var reqBody models.ToDo
 
 	if err := ctx.BindJSON(&reqBody); err != nil {
 		return
 	}
 
-	todo, err := c.Service.CreateTodo(&reqBody, listId)
+	if reqBody.Content == "" {
+		ctx.JSON(http.StatusBadRequest, "Empty content")
+		return
+	}
+
+	todo, err := c.Service.CreateTodo(&reqBody, ctx.Param("listid"))
 
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			ctx.JSON(http.StatusNotFound, "list not found")
-			return
-		}
-
-		if err.Error() == "empty content" {
-			ctx.AbortWithError(http.StatusBadRequest, err)
 			return
 		}
 
@@ -170,9 +168,8 @@ func (c *Controller) CreateTodo(ctx *gin.Context) {
 }
 
 func (c *Controller) GetTodo(ctx *gin.Context) {
-	todoId := ctx.Param("todoid")
 
-	todo, err := c.Service.GetTodo(todoId)
+	todo, err := c.Service.GetTodo(ctx.Param("todoid"))
 
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {

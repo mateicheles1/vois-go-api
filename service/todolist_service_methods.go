@@ -1,7 +1,6 @@
 package service
 
 import (
-	"errors"
 	"gogin-api/data"
 	"gogin-api/models"
 )
@@ -48,9 +47,6 @@ func (s *ToDoListService) GetTodos(listId string) ([]*models.ToDo, error) {
 }
 
 func (s *ToDoListService) CreateList(requestBody *models.RequestBodyList) (*models.ToDoList, error) {
-	if requestBody.Owner == "" {
-		return nil, errors.New("empty owner")
-	}
 
 	var todos []*models.ToDo
 
@@ -97,9 +93,6 @@ func (s *ToDoListService) GetList(listId string) (*models.ToDoList, error) {
 }
 
 func (s *ToDoListService) PatchList(reqBody *models.RequestBodyList, listId string) (*models.ToDoList, error) {
-	if reqBody.Owner == "" {
-		return nil, errors.New("empty owner")
-	}
 
 	list, err := s.db.PatchList(reqBody, listId)
 
@@ -129,9 +122,6 @@ func (s *ToDoListService) DeleteList(listId string) error {
 }
 
 func (s *ToDoListService) CreateTodo(reqBody *models.ToDo, listId string) (*models.ToDo, error) {
-	if reqBody.Content == "" {
-		return nil, errors.New("empty content")
-	}
 
 	todo, err := s.db.CreateTodo(reqBody, listId)
 
