@@ -22,6 +22,7 @@ func NewController(service service.ToDoListServiceInterface) *Controller {
 }
 
 func (c *Controller) GetLists(ctx *gin.Context) {
+
 	lists, err := c.Service.GetLists()
 
 	if err != nil {
