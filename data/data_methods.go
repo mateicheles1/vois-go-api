@@ -110,7 +110,7 @@ func (db *ToDoListDB) PatchList(reqBody *models.RequestBodyList, listId string) 
 
 	list.Owner = reqBody.Owner
 
-	if err := db.Lists.Save(&list).Error; err != nil {
+	if err := db.Lists.Model(&list).Update("owner", list.Owner).Error; err != nil {
 		return nil, err
 	}
 
@@ -198,7 +198,7 @@ func (db *ToDoListDB) PatchTodo(reqBody *models.ToDo, todoId string) (*models.To
 
 	todo.Completed = reqBody.Completed
 
-	if err := db.Lists.Save(&todo).Error; err != nil {
+	if err := db.Lists.Model(&todo).Update("completed", todo.Completed).Error; err != nil {
 		return nil, err
 	}
 

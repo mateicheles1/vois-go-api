@@ -62,7 +62,7 @@ func (s *ToDoListService) CreateList(requestBody *models.RequestBodyList) (*mode
 		dbToDo := &models.ToDo{
 			ListId:    requestBody.Id,
 			Content:   todo,
-			Completed: *&false,
+			Completed: false,
 		}
 
 		todos = append(todos, dbToDo)
