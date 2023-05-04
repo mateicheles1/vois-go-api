@@ -37,8 +37,14 @@ func (c *Controller) GetTodos(ctx *gin.Context) {
 	todos, err := c.Service.GetTodos(ctx.Param("listid"))
 
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
+
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			ctx.JSON(http.StatusNotFound, "list not found")
+			return
+		}
+
+		if err.Error() == "invalid UUID format" {
+			ctx.AbortWithError(http.StatusBadRequest, err)
 			return
 		}
 
@@ -54,12 +60,12 @@ func (c *Controller) CreateList(ctx *gin.Context) {
 	var reqBody models.RequestBodyList
 
 	if reqBody.Owner == "" {
-		ctx.JSON(http.StatusBadRequest, "Empty owner")
+		ctx.JSON(http.StatusBadRequest, "empty owner")
 		return
 	}
 
 	if len(reqBody.Todos) == 0 {
-		ctx.JSON(http.StatusBadRequest, "Empty todos")
+		ctx.JSON(http.StatusBadRequest, "empty todos")
 		return
 	}
 
@@ -84,8 +90,13 @@ func (c *Controller) GetList(ctx *gin.Context) {
 	list, err := c.Service.GetList(ctx.Param("listid"))
 
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			ctx.JSON(http.StatusNotFound, "list not found")
+			return
+		}
+
+		if err.Error() == "invalid UUID format" {
+			ctx.AbortWithError(http.StatusBadRequest, err)
 			return
 		}
 
@@ -104,15 +115,20 @@ func (c *Controller) PatchList(ctx *gin.Context) {
 	}
 
 	if reqBody.Owner == "" {
-		ctx.JSON(http.StatusBadRequest, "Empty owner")
+		ctx.JSON(http.StatusBadRequest, "empty owner")
 		return
 	}
 
 	list, err := c.Service.PatchList(&reqBody, ctx.Param("listid"))
 
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			ctx.JSON(http.StatusNotFound, "list not found")
+			return
+		}
+
+		if err.Error() == "invalid UUID format" {
+			ctx.AbortWithError(http.StatusBadRequest, err)
 			return
 		}
 
@@ -128,11 +144,19 @@ func (c *Controller) DeleteList(ctx *gin.Context) {
 	err := c.Service.DeleteList(ctx.Param("listid"))
 
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
+
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			ctx.JSON(http.StatusNotFound, "list not found")
 			return
 		}
+
+		if err.Error() == "invalid UUID format" {
+			ctx.AbortWithError(http.StatusBadRequest, err)
+			return
+		}
+
 		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
 	}
 
 	ctx.Status(http.StatusNoContent)
@@ -146,15 +170,20 @@ func (c *Controller) CreateTodo(ctx *gin.Context) {
 	}
 
 	if reqBody.Content == "" {
-		ctx.JSON(http.StatusBadRequest, "Empty content")
+		ctx.JSON(http.StatusBadRequest, "empty content")
 		return
 	}
 
 	todo, err := c.Service.CreateTodo(&reqBody, ctx.Param("listid"))
 
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			ctx.JSON(http.StatusNotFound, "list not found")
+			return
+		}
+
+		if err.Error() == "invalid UUID format" {
+			ctx.AbortWithError(http.StatusBadRequest, err)
 			return
 		}
 
@@ -172,8 +201,14 @@ func (c *Controller) GetTodo(ctx *gin.Context) {
 	todo, err := c.Service.GetTodo(ctx.Param("todoid"))
 
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
+
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			ctx.JSON(http.StatusNotFound, "todo not found")
+			return
+		}
+
+		if err.Error() == "invalid UUID format" {
+			ctx.AbortWithError(http.StatusBadRequest, err)
 			return
 		}
 
@@ -192,16 +227,14 @@ func (c *Controller) PatchTodo(ctx *gin.Context) {
 		return
 	}
 
-	todoId := ctx.Param("todoid")
-
-	todo, err := c.Service.PatchTodo(&reqBody, todoId)
+	todo, err := c.Service.PatchTodo(&reqBody, ctx.Param("todoid"))
 
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			ctx.JSON(http.StatusNotFound, "todo not found")
 		}
 
-		if err.Error() == "todo already completed" {
+		if err.Error() == "invalid UUID format" {
 			ctx.AbortWithError(http.StatusBadRequest, err)
 			return
 		}
@@ -221,6 +254,11 @@ func (c *Controller) DeleteTodo(ctx *gin.Context) {
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			ctx.JSON(http.StatusNotFound, "todo not found")
+			return
+		}
+
+		if err.Error() == "invalid UUID format" {
+			ctx.AbortWithError(http.StatusBadRequest, err)
 			return
 		}
 
