@@ -9,7 +9,7 @@ type RequestBodyList struct {
 type ToDoList struct {
 	Id    string  `gorm:"type:uuid;primary_key" json:"listid,omitempty"`
 	Owner string  `gorm:"not null" json:"owner,omitempty"`
-	Todos []*ToDo `gorm:"foreignKey:ListId;constraint:OnDelete:CASCADE" json:"todos,omitempty"`
+	Todos []*ToDo `gorm:"foreignKey:ListId;constraint:OnDelete:CASCADE" json:"todos"`
 }
 
 type ToDo struct {

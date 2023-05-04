@@ -59,6 +59,10 @@ func (c *Controller) GetTodos(ctx *gin.Context) {
 func (c *Controller) CreateList(ctx *gin.Context) {
 	var reqBody models.RequestBodyList
 
+	if err := ctx.BindJSON(&reqBody); err != nil {
+		return
+	}
+
 	if reqBody.Owner == "" {
 		ctx.JSON(http.StatusBadRequest, "empty owner")
 		return
@@ -66,10 +70,6 @@ func (c *Controller) CreateList(ctx *gin.Context) {
 
 	if len(reqBody.Todos) == 0 {
 		ctx.JSON(http.StatusBadRequest, "empty todos")
-		return
-	}
-
-	if err := ctx.BindJSON(&reqBody); err != nil {
 		return
 	}
 
