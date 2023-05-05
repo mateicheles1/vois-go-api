@@ -45,6 +45,7 @@ func (db *ToDoListDB) CreateList(reqBody *models.RequestBodyList, todos []*model
 	for i, todo := range dbList.Todos {
 		resBodyList.Todos[i] = &models.ToDo{
 			Id:        todo.Id,
+			ListId:    dbList.Id,
 			Content:   todo.Content,
 			Completed: todo.Completed,
 		}
