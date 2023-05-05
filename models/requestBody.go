@@ -2,7 +2,7 @@ package models
 
 type RequestBodyList struct {
 	Id    string   `json:"listid,omitempty"`
-	Owner string   `json:"owner" binding:"required"`
+	Owner string   `json:"owner"`
 	Todos []string `json:"todos"`
 }
 
