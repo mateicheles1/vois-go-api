@@ -13,7 +13,9 @@ func ErrorHandler() gin.HandlerFunc {
 
 		for _, err := range ctx.Errors {
 
-			if ctx.Writer.Status() == http.StatusBadRequest {
+			switch ctx.Writer.Status() {
+
+			case http.StatusBadRequest:
 				logs.ErrorLogger.Error().
 					Str("Method", ctx.Request.Method).
 					Str("Path", ctx.Request.URL.Path).
@@ -22,9 +24,8 @@ func ErrorHandler() gin.HandlerFunc {
 
 				ctx.JSON(http.StatusBadRequest, err.Error())
 				return
-			}
 
-			if ctx.Writer.Status() == http.StatusInternalServerError {
+			case http.StatusInternalServerError:
 				logs.ErrorLogger.Error().
 					Str("Method", ctx.Request.Method).
 					Str("Path", ctx.Request.URL.Path).
@@ -34,6 +35,7 @@ func ErrorHandler() gin.HandlerFunc {
 				ctx.JSON(http.StatusInternalServerError, "Something went wrong")
 				return
 			}
+
 		}
 	}
 }
