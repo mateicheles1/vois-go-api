@@ -12,18 +12,18 @@ import (
 )
 
 type Controller struct {
-	Service service.ToDoListServiceInterface
+	service service.ToDoListServiceInterface
 }
 
 func NewController(service service.ToDoListServiceInterface) *Controller {
 	return &Controller{
-		Service: service,
+		service: service,
 	}
 }
 
 func (c *Controller) GetLists(ctx *gin.Context) {
 
-	lists, err := c.Service.GetLists()
+	lists, err := c.service.GetLists()
 
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, err)
@@ -35,7 +35,7 @@ func (c *Controller) GetLists(ctx *gin.Context) {
 
 func (c *Controller) GetTodos(ctx *gin.Context) {
 
-	todos, err := c.Service.GetTodos(ctx.Param("listid"))
+	todos, err := c.service.GetTodos(ctx.Param("listid"))
 
 	if err != nil {
 
@@ -74,7 +74,7 @@ func (c *Controller) CreateList(ctx *gin.Context) {
 		return
 	}
 
-	list, err := c.Service.CreateList(&reqBody)
+	list, err := c.service.CreateList(&reqBody)
 
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, err)
@@ -88,7 +88,7 @@ func (c *Controller) CreateList(ctx *gin.Context) {
 
 func (c *Controller) GetList(ctx *gin.Context) {
 
-	list, err := c.Service.GetList(ctx.Param("listid"))
+	list, err := c.service.GetList(ctx.Param("listid"))
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -120,7 +120,7 @@ func (c *Controller) PatchList(ctx *gin.Context) {
 		return
 	}
 
-	list, err := c.Service.PatchList(&reqBody, ctx.Param("listid"))
+	list, err := c.service.PatchList(&reqBody, ctx.Param("listid"))
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -142,7 +142,7 @@ func (c *Controller) PatchList(ctx *gin.Context) {
 
 func (c *Controller) DeleteList(ctx *gin.Context) {
 
-	err := c.Service.DeleteList(ctx.Param("listid"))
+	err := c.service.DeleteList(ctx.Param("listid"))
 
 	if err != nil {
 
@@ -175,7 +175,7 @@ func (c *Controller) CreateTodo(ctx *gin.Context) {
 		return
 	}
 
-	todo, err := c.Service.CreateTodo(&reqBody, ctx.Param("listid"))
+	todo, err := c.service.CreateTodo(&reqBody, ctx.Param("listid"))
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -199,7 +199,7 @@ func (c *Controller) CreateTodo(ctx *gin.Context) {
 
 func (c *Controller) GetTodo(ctx *gin.Context) {
 
-	todo, err := c.Service.GetTodo(ctx.Param("todoid"))
+	todo, err := c.service.GetTodo(ctx.Param("todoid"))
 
 	if err != nil {
 
@@ -228,7 +228,7 @@ func (c *Controller) PatchTodo(ctx *gin.Context) {
 		return
 	}
 
-	todo, err := c.Service.PatchTodo(&reqBody, ctx.Param("todoid"))
+	todo, err := c.service.PatchTodo(&reqBody, ctx.Param("todoid"))
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -250,7 +250,7 @@ func (c *Controller) PatchTodo(ctx *gin.Context) {
 func (c *Controller) DeleteTodo(ctx *gin.Context) {
 	todoId := ctx.Param("todoid")
 
-	err := c.Service.DeleteTodo(todoId)
+	err := c.service.DeleteTodo(todoId)
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {

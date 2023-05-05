@@ -11,7 +11,6 @@ type Config struct {
 	Server ServerConfig `json:"server"`
 	DB     DBConfig     `json:"database"`
 }
-
 type ServerConfig struct {
 	Host string `json:"host"`
 	Port string `json:"port"`

@@ -9,12 +9,12 @@ import (
 )
 
 type ToDoListDB struct {
-	Lists *gorm.DB
+	lists *gorm.DB
 }
 
 func NewToDoListDB(db *gorm.DB) *ToDoListDB {
 	return &ToDoListDB{
-		Lists: db,
+		lists: db,
 	}
 }
 
@@ -30,7 +30,7 @@ func (db *ToDoListDB) CreateList(reqBody *models.RequestBodyList, todos []*model
 		dbList.Todos = append(dbList.Todos, todos[i])
 	}
 
-	err := db.Lists.Create(&dbList).Error
+	err := db.lists.Create(&dbList).Error
 
 	if err != nil {
 		return nil, err
@@ -56,7 +56,7 @@ func (db *ToDoListDB) CreateList(reqBody *models.RequestBodyList, todos []*model
 func (db *ToDoListDB) GetList(listId string) (*models.ToDoList, error) {
 	var list models.ToDoList
 
-	result := db.Lists.Preload("Todos").First(&list, "id = ?", listId)
+	result := db.lists.Preload("Todos").First(&list, "id = ?", listId)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return nil, gorm.ErrRecordNotFound
@@ -70,7 +70,7 @@ func (db *ToDoListDB) GetList(listId string) (*models.ToDoList, error) {
 func (db *ToDoListDB) GetLists() ([]*models.ToDoList, error) {
 	var lists []*models.ToDoList
 
-	result := db.Lists.Preload("Todos").Find(&lists)
+	result := db.lists.Preload("Todos").Find(&lists)
 
 	if result.Error != nil {
 		return nil, result.Error
@@ -82,7 +82,7 @@ func (db *ToDoListDB) GetLists() ([]*models.ToDoList, error) {
 func (db *ToDoListDB) GetTodos(listId string) ([]*models.ToDo, error) {
 	var todos []*models.ToDo
 
-	result := db.Lists.Find(&todos, "list_id = ?", listId)
+	result := db.lists.Find(&todos, "list_id = ?", listId)
 
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -99,7 +99,7 @@ func (db *ToDoListDB) PatchList(reqBody *models.RequestBodyList, listId string) 
 
 	var list models.ToDoList
 
-	result := db.Lists.Preload("Todos").First(&list, "id = ?", listId)
+	result := db.lists.Preload("Todos").First(&list, "id = ?", listId)
 
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -110,7 +110,7 @@ func (db *ToDoListDB) PatchList(reqBody *models.RequestBodyList, listId string) 
 
 	list.Owner = reqBody.Owner
 
-	if err := db.Lists.Table("to_do_lists").Where("id = ?", list.Id).Update("owner", list.Owner).Error; err != nil {
+	if err := db.lists.Table("to_do_lists").Where("id = ?", list.Id).Update("owner", list.Owner).Error; err != nil {
 		return nil, err
 	}
 
@@ -121,7 +121,7 @@ func (db *ToDoListDB) DeleteList(listId string) error {
 
 	var list models.ToDoList
 
-	result := db.Lists.First(&list, "id = ?", listId)
+	result := db.lists.First(&list, "id = ?", listId)
 
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -131,7 +131,7 @@ func (db *ToDoListDB) DeleteList(listId string) error {
 		return result.Error
 	}
 
-	if err := db.Lists.Delete(&list).Error; err != nil {
+	if err := db.lists.Delete(&list).Error; err != nil {
 		return err
 	}
 
@@ -140,7 +140,7 @@ func (db *ToDoListDB) DeleteList(listId string) error {
 
 func (db *ToDoListDB) CreateTodo(reqBody *models.ToDo, listId string) (*models.ToDo, error) {
 
-	result := db.Lists.First(&models.ToDoList{}, "id = ?", listId)
+	result := db.lists.First(&models.ToDoList{}, "id = ?", listId)
 
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -157,7 +157,7 @@ func (db *ToDoListDB) CreateTodo(reqBody *models.ToDo, listId string) (*models.T
 		Completed: false,
 	}
 
-	result = db.Lists.Create(todo)
+	result = db.lists.Create(todo)
 
 	if result.Error != nil {
 		return nil, result.Error
@@ -170,7 +170,7 @@ func (db *ToDoListDB) CreateTodo(reqBody *models.ToDo, listId string) (*models.T
 func (db *ToDoListDB) GetTodo(todoId string) (*models.ToDo, error) {
 	var todo models.ToDo
 
-	result := db.Lists.First(&todo, "id = ?", todoId)
+	result := db.lists.First(&todo, "id = ?", todoId)
 
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -186,7 +186,7 @@ func (db *ToDoListDB) GetTodo(todoId string) (*models.ToDo, error) {
 func (db *ToDoListDB) PatchTodo(reqBody *models.ToDo, todoId string) (*models.ToDo, error) {
 	var todo models.ToDo
 
-	result := db.Lists.First(&todo, "id = ?", todoId)
+	result := db.lists.First(&todo, "id = ?", todoId)
 
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -198,7 +198,7 @@ func (db *ToDoListDB) PatchTodo(reqBody *models.ToDo, todoId string) (*models.To
 
 	todo.Completed = reqBody.Completed
 
-	if err := db.Lists.Table("to_dos").Where("id = ?", todo.Id).Update("completed", todo.Completed).Error; err != nil {
+	if err := db.lists.Table("to_dos").Where("id = ?", todo.Id).Update("completed", todo.Completed).Error; err != nil {
 		return nil, err
 	}
 
@@ -208,7 +208,7 @@ func (db *ToDoListDB) PatchTodo(reqBody *models.ToDo, todoId string) (*models.To
 func (db *ToDoListDB) DeleteTodo(todoId string) error {
 	var todo models.ToDo
 
-	result := db.Lists.First(&todo, "id = ?", todoId)
+	result := db.lists.First(&todo, "id = ?", todoId)
 
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -218,7 +218,7 @@ func (db *ToDoListDB) DeleteTodo(todoId string) error {
 		return result.Error
 	}
 
-	if err := db.Lists.Delete(&todo).Error; err != nil {
+	if err := db.lists.Delete(&todo).Error; err != nil {
 		return err
 	}
 
