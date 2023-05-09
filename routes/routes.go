@@ -14,6 +14,7 @@ import (
 )
 
 func SetupRoutes() {
+
 	config := config.NewConfig("./config/config.json")
 	db := data.ConnectToDB(config)
 	data := data.NewToDoListDB(db)
@@ -42,4 +43,5 @@ func SetupRoutes() {
 	if err := r.Run(fmt.Sprintf("%s:%s", config.Server.Host, config.Server.Port)); err != nil {
 		logs.ErrorLogger.Fatal().Msgf("Could not start the server due to: %s", err)
 	}
+
 }

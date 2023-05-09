@@ -21,6 +21,8 @@ func NewController(service service.ToDoListServiceInterface) *Controller {
 	}
 }
 
+var ErrInvalidUUID service.UuidError
+
 func (c *Controller) GetLists(ctx *gin.Context) {
 
 	lists, err := c.service.GetLists()
@@ -44,7 +46,7 @@ func (c *Controller) GetTodos(ctx *gin.Context) {
 			return
 		}
 
-		if err.Error() == "invalid UUID format" {
+		if errors.As(err, &ErrInvalidUUID) {
 			ctx.AbortWithError(http.StatusBadRequest, err)
 			return
 		}
@@ -96,7 +98,7 @@ func (c *Controller) GetList(ctx *gin.Context) {
 			return
 		}
 
-		if err.Error() == "invalid UUID format" {
+		if errors.As(err, &ErrInvalidUUID) {
 			ctx.AbortWithError(http.StatusBadRequest, err)
 			return
 		}
@@ -128,7 +130,7 @@ func (c *Controller) PatchList(ctx *gin.Context) {
 			return
 		}
 
-		if err.Error() == "invalid UUID format" {
+		if errors.As(err, &ErrInvalidUUID) {
 			ctx.AbortWithError(http.StatusBadRequest, err)
 			return
 		}
@@ -151,7 +153,7 @@ func (c *Controller) DeleteList(ctx *gin.Context) {
 			return
 		}
 
-		if err.Error() == "invalid UUID format" {
+		if errors.As(err, &ErrInvalidUUID) {
 			ctx.AbortWithError(http.StatusBadRequest, err)
 			return
 		}
@@ -183,7 +185,7 @@ func (c *Controller) CreateTodo(ctx *gin.Context) {
 			return
 		}
 
-		if err.Error() == "invalid UUID format" {
+		if errors.As(err, &ErrInvalidUUID) {
 			ctx.AbortWithError(http.StatusBadRequest, err)
 			return
 		}
@@ -208,7 +210,7 @@ func (c *Controller) GetTodo(ctx *gin.Context) {
 			return
 		}
 
-		if err.Error() == "invalid UUID format" {
+		if errors.As(err, &ErrInvalidUUID) {
 			ctx.AbortWithError(http.StatusBadRequest, err)
 			return
 		}
@@ -235,7 +237,7 @@ func (c *Controller) PatchTodo(ctx *gin.Context) {
 			ctx.JSON(http.StatusNotFound, "todo not found")
 		}
 
-		if err.Error() == "invalid UUID format" {
+		if errors.As(err, &ErrInvalidUUID) {
 			ctx.AbortWithError(http.StatusBadRequest, err)
 			return
 		}
@@ -258,7 +260,7 @@ func (c *Controller) DeleteTodo(ctx *gin.Context) {
 			return
 		}
 
-		if err.Error() == "invalid UUID format" {
+		if errors.As(err, &ErrInvalidUUID) {
 			ctx.AbortWithError(http.StatusBadRequest, err)
 			return
 		}

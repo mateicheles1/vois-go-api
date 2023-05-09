@@ -1,7 +1,6 @@
 package service
 
 import (
-	"errors"
 	"gogin-api/data"
 	"gogin-api/models"
 
@@ -17,6 +16,8 @@ func NewToDoListService(data data.ToDoListDBInterface) *ToDoListService {
 		db: data,
 	}
 }
+
+var invalidUUID = UuidError{Message: "invalid uuid format"}
 
 func (s *ToDoListService) GetLists() ([]*models.ToDoList, error) {
 
@@ -38,7 +39,7 @@ func (s *ToDoListService) GetLists() ([]*models.ToDoList, error) {
 func (s *ToDoListService) GetTodos(listId string) ([]*models.ToDo, error) {
 
 	if _, err := uuid.Parse(listId); err != nil {
-		return nil, errors.New("invalid UUID format")
+		return nil, invalidUUID
 	}
 
 	todos, err := s.db.GetTodos(listId)
@@ -83,7 +84,7 @@ func (s *ToDoListService) CreateList(requestBody *models.RequestBodyList) (*mode
 func (s *ToDoListService) GetList(listId string) (*models.ToDoList, error) {
 
 	if _, err := uuid.Parse(listId); err != nil {
-		return nil, errors.New("invalid UUID format")
+		return nil, invalidUUID
 	}
 
 	list, err := s.db.GetList(listId)
@@ -112,7 +113,7 @@ func (s *ToDoListService) GetList(listId string) (*models.ToDoList, error) {
 func (s *ToDoListService) PatchList(reqBody *models.RequestBodyList, listId string) (*models.ToDoList, error) {
 
 	if _, err := uuid.Parse(listId); err != nil {
-		return nil, errors.New("invalid UUID format")
+		return nil, invalidUUID
 	}
 
 	list, err := s.db.PatchList(reqBody, listId)
@@ -135,7 +136,7 @@ func (s *ToDoListService) PatchList(reqBody *models.RequestBodyList, listId stri
 func (s *ToDoListService) DeleteList(listId string) error {
 
 	if _, err := uuid.Parse(listId); err != nil {
-		return errors.New("invalid UUID format")
+		return invalidUUID
 	}
 
 	err := s.db.DeleteList(listId)
@@ -150,7 +151,7 @@ func (s *ToDoListService) DeleteList(listId string) error {
 func (s *ToDoListService) CreateTodo(reqBody *models.ToDo, listId string) (*models.ToDo, error) {
 
 	if _, err := uuid.Parse(listId); err != nil {
-		return nil, errors.New("invalid UUID format")
+		return nil, invalidUUID
 	}
 
 	todo, err := s.db.CreateTodo(reqBody, listId)
@@ -165,7 +166,7 @@ func (s *ToDoListService) CreateTodo(reqBody *models.ToDo, listId string) (*mode
 func (s *ToDoListService) GetTodo(todoId string) (*models.ToDo, error) {
 
 	if _, err := uuid.Parse(todoId); err != nil {
-		return nil, errors.New("invalid UUID format")
+		return nil, invalidUUID
 	}
 
 	todo, err := s.db.GetTodo(todoId)
@@ -186,7 +187,7 @@ func (s *ToDoListService) GetTodo(todoId string) (*models.ToDo, error) {
 func (s *ToDoListService) PatchTodo(reqBody *models.ToDo, todoId string) (*models.ToDo, error) {
 
 	if _, err := uuid.Parse(todoId); err != nil {
-		return nil, errors.New("invalid UUID format")
+		return nil, invalidUUID
 	}
 
 	todo, err := s.db.PatchTodo(reqBody, todoId)
@@ -201,7 +202,7 @@ func (s *ToDoListService) PatchTodo(reqBody *models.ToDo, todoId string) (*model
 func (s *ToDoListService) DeleteTodo(todoId string) error {
 
 	if _, err := uuid.Parse(todoId); err != nil {
-		return errors.New("invalid UUID format")
+		return invalidUUID
 	}
 
 	err := s.db.DeleteTodo(todoId)

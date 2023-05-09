@@ -13,6 +13,7 @@ func errorLogger() (zerolog.Logger, *os.File) {
 		os.O_RDWR|os.O_CREATE|os.O_APPEND,
 		0644,
 	)
+
 	if err != nil {
 		log.Panic().Msgf("Could not open file due to: %s", err.Error())
 	}
