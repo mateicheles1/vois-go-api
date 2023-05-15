@@ -62,6 +62,8 @@ func (c *Controller) GetTodos(ctx *gin.Context) {
 func (c *Controller) CreateList(ctx *gin.Context) {
 	var reqBody models.RequestBodyList
 
+	// - BindJSON, daca nu populeaza field urile, automat apeleaza ctx.	AbortWithError(http.statusBadRequest, err) si eroarea este preluata de middleware. Datorita acestui lucru, in body ul de mai jos apare doar "return"
+
 	if err := ctx.BindJSON(&reqBody); err != nil {
 		return
 	}
@@ -233,8 +235,10 @@ func (c *Controller) PatchTodo(ctx *gin.Context) {
 	todo, err := c.service.PatchTodo(&reqBody, ctx.Param("todoid"))
 
 	if err != nil {
+
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			ctx.JSON(http.StatusNotFound, "todo not found")
+			return
 		}
 
 		if errors.As(err, &ErrInvalidUUID) {
@@ -250,9 +254,8 @@ func (c *Controller) PatchTodo(ctx *gin.Context) {
 }
 
 func (c *Controller) DeleteTodo(ctx *gin.Context) {
-	todoId := ctx.Param("todoid")
 
-	err := c.service.DeleteTodo(todoId)
+	err := c.service.DeleteTodo(ctx.Param("todoid"))
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {

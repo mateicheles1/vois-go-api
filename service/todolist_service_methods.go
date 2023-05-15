@@ -17,7 +17,7 @@ func NewToDoListService(data data.ToDoListDBInterface) *ToDoListService {
 	}
 }
 
-var invalidUUID = UuidError{Message: "invalid uuid format"}
+var invalidUUID = UuidError{message: "invalid uuid format"}
 
 func (s *ToDoListService) GetLists() ([]*models.ToDoList, error) {
 

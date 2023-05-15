@@ -1,9 +1,9 @@
 package service
 
 type UuidError struct {
-	Message string
+	message string
 }
 
 func (e UuidError) Error() string {
-	return e.Message
+	return e.message
 }

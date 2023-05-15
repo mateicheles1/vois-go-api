@@ -20,6 +20,7 @@ func NewToDoListDB(db *gorm.DB) *ToDoListDB {
 
 func (db *ToDoListDB) CreateList(reqBody *models.RequestBodyList, todos []*models.ToDo) (*models.ToDoList, error) {
 	listId := uuid.New().String()
+
 	dbList := models.ToDoList{
 		Id:    listId,
 		Owner: reqBody.Owner,
@@ -36,22 +37,7 @@ func (db *ToDoListDB) CreateList(reqBody *models.RequestBodyList, todos []*model
 		return nil, err
 	}
 
-	resBodyList := &models.ToDoList{
-		Id:    dbList.Id,
-		Owner: dbList.Owner,
-		Todos: make([]*models.ToDo, len(dbList.Todos)),
-	}
-
-	for i, todo := range dbList.Todos {
-		resBodyList.Todos[i] = &models.ToDo{
-			Id:        todo.Id,
-			ListId:    dbList.Id,
-			Content:   todo.Content,
-			Completed: todo.Completed,
-		}
-	}
-
-	return resBodyList, nil
+	return &dbList, nil
 }
 
 func (db *ToDoListDB) GetList(listId string) (*models.ToDoList, error) {
