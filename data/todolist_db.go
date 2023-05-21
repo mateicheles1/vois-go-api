@@ -17,7 +17,7 @@ func ConnectToDB(config *config.Config) *gorm.DB {
 		logs.ErrorLogger.Fatal().Msgf("Could not connect to DB due to: %s", err)
 	}
 
-	if err = db.AutoMigrate(&models.ToDoList{}, &models.ToDo{}); err != nil {
+	if err = db.AutoMigrate(&models.User{}, &models.ToDoList{}, &models.ToDo{}); err != nil {
 		logs.ErrorLogger.Fatal().Msgf("Failed to migrate to db: %s", err)
 	}
 

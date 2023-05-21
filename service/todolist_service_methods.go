@@ -3,7 +3,10 @@ package service
 import (
 	"gogin-api/data"
 	"gogin-api/models"
+	"os"
+	"time"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
 )
 
@@ -212,4 +215,40 @@ func (s *ToDoListService) DeleteTodo(todoId string) error {
 	}
 
 	return nil
+}
+
+func (s *ToDoListService) CreateUser(reqBody *models.User) (*models.User, error) {
+	user, err := s.db.CreateUser(reqBody)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func (s *ToDoListService) Login(reqBody *models.User) (string, error) {
+
+	user, err := s.db.Login(reqBody)
+
+	if err != nil {
+		return "", err
+	}
+
+	token := jwt.New(jwt.SigningMethodHS256)
+
+	claims := token.Claims.(jwt.MapClaims)
+	claims["username"] = user.Username
+	claims["exp"] = time.Now().Add(time.Hour * 24).Unix()
+
+	tokenByte, err := token.SignedString([]byte(os.Getenv("SECRET")))
+
+	if err != nil {
+		return "", err
+	}
+
+	tokenString := string(tokenByte)
+
+	return tokenString, nil
+
 }

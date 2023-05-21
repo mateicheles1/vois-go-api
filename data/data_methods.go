@@ -211,3 +211,32 @@ func (db *ToDoListDB) DeleteTodo(todoId string) error {
 
 	return nil
 }
+
+func (db *ToDoListDB) CreateUser(reqBody *models.User) (*models.User, error) {
+
+	err := db.lists.Create(reqBody).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return reqBody, nil
+}
+
+func (db *ToDoListDB) Login(reqBody *models.User) (*models.User, error) {
+
+	var user models.User
+
+	result := db.lists.Where("username = ? AND password = ?", reqBody.Username, reqBody.Password).First(&user)
+
+	if result.Error != nil {
+
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, gorm.ErrRecordNotFound
+		}
+
+		return nil, result.Error
+	}
+
+	return &user, nil
+}

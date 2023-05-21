@@ -34,8 +34,26 @@ func ErrorHandler() gin.HandlerFunc {
 
 				ctx.JSON(http.StatusInternalServerError, "Something went wrong")
 				return
-			}
 
+			case http.StatusUnauthorized:
+				logs.ErrorLogger.Error().
+					Str("Method", ctx.Request.Method).
+					Str("Path", ctx.Request.URL.Path).
+					Int("Status code", http.StatusUnauthorized).
+					Msgf("Unauthorized: %s", err)
+
+				ctx.JSON(http.StatusUnauthorized, "invalid credentials")
+				return
+
+			case http.StatusForbidden:
+				logs.ErrorLogger.Error().
+					Str("Method", ctx.Request.Method).
+					Str("Path", ctx.Request.URL.Path).
+					Int("Status code", http.StatusForbidden).
+					Msgf("Forbidden: %s", err)
+
+				ctx.JSON(http.StatusForbidden, "action not allowed")
+			}
 		}
 	}
 }

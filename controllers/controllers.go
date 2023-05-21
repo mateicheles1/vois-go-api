@@ -62,8 +62,6 @@ func (c *Controller) GetTodos(ctx *gin.Context) {
 func (c *Controller) CreateList(ctx *gin.Context) {
 	var reqBody models.RequestBodyList
 
-	// - BindJSON, daca nu populeaza field urile, automat apeleaza ctx.	AbortWithError(http.statusBadRequest, err) si eroarea este preluata de middleware. Datorita acestui lucru, in body ul de mai jos apare doar "return"
-
 	if err := ctx.BindJSON(&reqBody); err != nil {
 		return
 	}
@@ -95,6 +93,7 @@ func (c *Controller) GetList(ctx *gin.Context) {
 	list, err := c.service.GetList(ctx.Param("listid"))
 
 	if err != nil {
+
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			ctx.JSON(http.StatusNotFound, "list not found")
 			return
@@ -273,4 +272,50 @@ func (c *Controller) DeleteTodo(ctx *gin.Context) {
 	}
 
 	ctx.Status(http.StatusNoContent)
+}
+
+func (c *Controller) CreateUser(ctx *gin.Context) {
+	var reqBody models.User
+
+	if err := ctx.BindJSON(&reqBody); err != nil {
+		return
+	}
+
+	if reqBody.Role == "" {
+		ctx.AbortWithError(http.StatusBadRequest, errors.New("empty owner"))
+		return
+	}
+
+	user, err := c.service.CreateUser(&reqBody)
+
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, user)
+
+}
+
+func (c *Controller) Login(ctx *gin.Context) {
+	var reqBody models.User
+
+	if err := ctx.BindJSON(&reqBody); err != nil {
+		return
+	}
+
+	token, err := c.service.Login(&reqBody)
+
+	if err != nil {
+
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			ctx.AbortWithError(http.StatusUnauthorized, err)
+			return
+		}
+
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"token": token})
 }
