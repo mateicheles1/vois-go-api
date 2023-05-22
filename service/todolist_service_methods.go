@@ -22,9 +22,16 @@ func NewToDoListService(data data.ToDoListDBInterface) *ToDoListService {
 
 var invalidUUID = UuidError{message: "invalid uuid format"}
 
-func (s *ToDoListService) GetLists() ([]*models.ToDoList, error) {
+func (s *ToDoListService) GetLists(username string, role string) ([]*models.ToDoList, error) {
 
-	lists, err := s.db.GetLists()
+	var lists []*models.ToDoList
+	var err error
+
+	if role != "admin" {
+		lists, err = s.db.GetLists(username)
+	} else {
+		lists, err = s.db.GetAllListsAdmin()
+	}
 
 	for i := range lists {
 		for j := range lists[i].Todos {
@@ -147,6 +154,21 @@ func (s *ToDoListService) DeleteList(listId string) error {
 	}
 
 	err := s.db.DeleteList(listId)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *ToDoListService) DeleteAllLists(role string) error {
+
+	if role != "admin" {
+		return errors.New("action not allowed")
+	}
+
+	err := s.db.DeleteAllLists()
 
 	if err != nil {
 		return err

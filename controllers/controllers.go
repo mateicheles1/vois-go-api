@@ -25,7 +25,10 @@ var ErrInvalidUUID service.UuidError
 
 func (c *Controller) GetLists(ctx *gin.Context) {
 
-	lists, err := c.service.GetLists()
+	username := ctx.MustGet("username").(string)
+	role := ctx.MustGet("role").(string)
+
+	lists, err := c.service.GetLists(username, role)
 
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, err)
@@ -272,6 +275,26 @@ func (c *Controller) DeleteTodo(ctx *gin.Context) {
 
 		if errors.As(err, &ErrInvalidUUID) {
 			ctx.AbortWithError(http.StatusBadRequest, err)
+			return
+		}
+
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	ctx.Status(http.StatusNoContent)
+}
+
+func (c *Controller) DeleteAllLists(ctx *gin.Context) {
+
+	role := ctx.MustGet("role").(string)
+
+	err := c.service.DeleteAllLists(role)
+
+	if err != nil {
+
+		if err.Error() == "action not allowed" {
+			ctx.AbortWithError(http.StatusForbidden, err)
 			return
 		}
 

@@ -34,6 +34,7 @@ func SetupRoutes() {
 	r.POST("api/v2/login", controller.Login)
 	r.POST("api/v2/signup", controller.CreateUser)
 
+	authRoute.DELETE("lists", controller.DeleteAllLists)
 	authRoute.GET("lists", controller.GetLists)
 	authRoute.GET("lists/:listid/todos", controller.GetTodos)
 

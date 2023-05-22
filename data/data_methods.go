@@ -55,10 +55,10 @@ func (db *ToDoListDB) GetList(listId string) (*models.ToDoList, error) {
 	return &list, nil
 }
 
-func (db *ToDoListDB) GetLists() ([]*models.ToDoList, error) {
+func (db *ToDoListDB) GetLists(username string) ([]*models.ToDoList, error) {
 	var lists []*models.ToDoList
 
-	result := db.lists.Preload("Todos").Find(&lists)
+	result := db.lists.Preload("Todos").Find(&lists, "owner = ?", username)
 
 	if result.Error != nil {
 		return nil, result.Error
@@ -120,6 +120,16 @@ func (db *ToDoListDB) DeleteList(listId string) error {
 	}
 
 	if err := db.lists.Delete(&list).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db *ToDoListDB) DeleteAllLists() error {
+	err := db.lists.Where("1=1").Delete(&models.ToDoList{}).Error
+
+	if err != nil {
 		return err
 	}
 
@@ -253,4 +263,16 @@ func (db *ToDoListDB) FindUserByUsername(username string) (*models.User, error) 
 
 	return &user, nil
 
+}
+
+func (db *ToDoListDB) GetAllListsAdmin() ([]*models.ToDoList, error) {
+	var lists []*models.ToDoList
+
+	result := db.lists.Preload("Todos").Find(&lists)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return lists, nil
 }
