@@ -19,6 +19,7 @@ func NewToDoListDB(db *gorm.DB) *ToDoListDB {
 }
 
 func (db *ToDoListDB) CreateList(reqBody *models.RequestBodyList, todos []*models.ToDo) (*models.ToDoList, error) {
+
 	listId := uuid.New().String()
 
 	dbList := models.ToDoList{
@@ -227,16 +228,29 @@ func (db *ToDoListDB) Login(reqBody *models.User) (*models.User, error) {
 
 	var user models.User
 
-	result := db.lists.Where("username = ? AND password = ?", reqBody.Username, reqBody.Password).First(&user)
+	err := db.lists.First(&user, "username = ? AND password = ?", reqBody.Username, reqBody.Password).Error
+	if err != nil {
 
-	if result.Error != nil {
-
-		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, gorm.ErrRecordNotFound
 		}
 
-		return nil, result.Error
+		return nil, err
 	}
 
 	return &user, nil
+
+}
+
+func (db *ToDoListDB) FindUserByUsername(username string) (*models.User, error) {
+	var user models.User
+
+	err := db.lists.First(&user, "username = ?", username).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+
 }

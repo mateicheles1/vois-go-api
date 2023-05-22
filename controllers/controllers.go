@@ -66,17 +66,16 @@ func (c *Controller) CreateList(ctx *gin.Context) {
 		return
 	}
 
-	if reqBody.Owner == "" {
-		ctx.JSON(http.StatusBadRequest, "empty owner")
-		return
-	}
+	owner := ctx.MustGet("username").(string)
+
+	reqBody.Owner = owner
 
 	if len(reqBody.Todos) == 0 {
 		ctx.JSON(http.StatusBadRequest, "empty todos")
 		return
 	}
 
-	list, err := c.service.CreateList(&reqBody)
+	list, err := c.service.CreateList(&reqBody, reqBody.Owner)
 
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, err)
@@ -90,7 +89,10 @@ func (c *Controller) CreateList(ctx *gin.Context) {
 
 func (c *Controller) GetList(ctx *gin.Context) {
 
-	list, err := c.service.GetList(ctx.Param("listid"))
+	username := ctx.MustGet("username").(string)
+	role := ctx.MustGet("role").(string)
+
+	list, err := c.service.GetList(ctx.Param("listid"), username, role)
 
 	if err != nil {
 
@@ -101,6 +103,11 @@ func (c *Controller) GetList(ctx *gin.Context) {
 
 		if errors.As(err, &ErrInvalidUUID) {
 			ctx.AbortWithError(http.StatusBadRequest, err)
+			return
+		}
+
+		if err.Error() == "action not allowed" {
+			ctx.AbortWithError(http.StatusForbidden, err)
 			return
 		}
 
@@ -181,6 +188,7 @@ func (c *Controller) CreateTodo(ctx *gin.Context) {
 	todo, err := c.service.CreateTodo(&reqBody, ctx.Param("listid"))
 
 	if err != nil {
+
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			ctx.JSON(http.StatusNotFound, "list not found")
 			return
@@ -307,7 +315,6 @@ func (c *Controller) Login(ctx *gin.Context) {
 	token, err := c.service.Login(&reqBody)
 
 	if err != nil {
-
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			ctx.AbortWithError(http.StatusUnauthorized, err)
 			return
@@ -317,5 +324,5 @@ func (c *Controller) Login(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"token": token})
+	ctx.JSON(http.StatusOK, token)
 }

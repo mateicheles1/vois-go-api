@@ -3,12 +3,12 @@ package service
 import "gogin-api/models"
 
 type ToDoListServiceInterface interface {
-	CreateList(requestBody *models.RequestBodyList) (*models.ToDoList, error)
+	CreateList(requestBody *models.RequestBodyList, owner string) (*models.ToDoList, error)
 	CreateTodo(reqBody *models.ToDo, listId string) (*models.ToDo, error)
 	CreateUser(reqBody *models.User) (*models.User, error)
 	DeleteList(listId string) error
 	DeleteTodo(todoId string) error
-	GetList(listId string) (*models.ToDoList, error)
+	GetList(listId string, username string, role string) (*models.ToDoList, error)
 	GetLists() ([]*models.ToDoList, error)
 	GetTodo(todoId string) (*models.ToDo, error)
 	GetTodos(listId string) ([]*models.ToDo, error)

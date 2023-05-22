@@ -1,9 +1,9 @@
 package service
 
 import (
+	"errors"
 	"gogin-api/data"
 	"gogin-api/models"
-	"os"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -58,7 +58,7 @@ func (s *ToDoListService) GetTodos(listId string) ([]*models.ToDo, error) {
 	return todos, nil
 }
 
-func (s *ToDoListService) CreateList(requestBody *models.RequestBodyList) (*models.ToDoList, error) {
+func (s *ToDoListService) CreateList(requestBody *models.RequestBodyList, owner string) (*models.ToDoList, error) {
 
 	var todos []*models.ToDo
 
@@ -84,7 +84,7 @@ func (s *ToDoListService) CreateList(requestBody *models.RequestBodyList) (*mode
 
 }
 
-func (s *ToDoListService) GetList(listId string) (*models.ToDoList, error) {
+func (s *ToDoListService) GetList(listId string, username string, role string) (*models.ToDoList, error) {
 
 	if _, err := uuid.Parse(listId); err != nil {
 		return nil, invalidUUID
@@ -94,6 +94,10 @@ func (s *ToDoListService) GetList(listId string) (*models.ToDoList, error) {
 
 	if err != nil {
 		return nil, err
+	}
+
+	if username != list.Owner || role != "admin" {
+		return nil, errors.New("action not allowed")
 	}
 
 	list.Id = ""
@@ -218,6 +222,9 @@ func (s *ToDoListService) DeleteTodo(todoId string) error {
 }
 
 func (s *ToDoListService) CreateUser(reqBody *models.User) (*models.User, error) {
+
+	reqBody.SecretKey = uuid.New().String()
+
 	user, err := s.db.CreateUser(reqBody)
 
 	if err != nil {
@@ -239,16 +246,14 @@ func (s *ToDoListService) Login(reqBody *models.User) (string, error) {
 
 	claims := token.Claims.(jwt.MapClaims)
 	claims["username"] = user.Username
+	claims["role"] = user.Role
 	claims["exp"] = time.Now().Add(time.Hour * 24).Unix()
 
-	tokenByte, err := token.SignedString([]byte(os.Getenv("SECRET")))
+	signedToken, err := token.SignedString([]byte(user.SecretKey))
 
 	if err != nil {
 		return "", err
 	}
 
-	tokenString := string(tokenByte)
-
-	return tokenString, nil
-
+	return signedToken, nil
 }
