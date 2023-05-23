@@ -3,16 +3,15 @@ package middlewares
 import (
 	"errors"
 	"fmt"
-	"gogin-api/data"
-	"gogin-api/logs"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
 
-func AuthMiddleware(db *data.ToDoListDB) gin.HandlerFunc {
+func AuthMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		authHeader := ctx.GetHeader("Authorization")
 
@@ -33,29 +32,10 @@ func AuthMiddleware(db *data.ToDoListDB) gin.HandlerFunc {
 				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 			}
 
-			claims, ok := token.Claims.(jwt.MapClaims)
-
-			if !ok {
-				return nil, errors.New("invalid token claims")
-			}
-
-			username, ok := claims["username"].(string)
-
-			if !ok {
-				return nil, errors.New("invalid username claim")
-			}
-
-			user, err := db.FindUserByUsername(username)
-
-			if err != nil {
-				return nil, fmt.Errorf("could not find username: %s", err)
-			}
-
-			return []byte(user.SecretKey), nil
+			return []byte(os.Getenv("SECRET")), nil
 		})
 
 		if err != nil {
-			logs.ErrorLogger.Error().Msgf("Invalid token: %s", err)
 			ctx.AbortWithError(http.StatusUnauthorized, err)
 			return
 		}

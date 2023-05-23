@@ -297,7 +297,7 @@ func (c *Controller) DeleteAllLists(ctx *gin.Context) {
 			ctx.AbortWithError(http.StatusForbidden, err)
 			return
 		}
-
+		
 		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}

@@ -29,7 +29,7 @@ func SetupRoutes() {
 
 	authRoute := r.Group("api/v2")
 
-	authRoute.Use(middlewares.AuthMiddleware(data))
+	authRoute.Use(middlewares.AuthMiddleware())
 
 	r.POST("api/v2/login", controller.Login)
 	r.POST("api/v2/signup", controller.CreateUser)

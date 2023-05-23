@@ -4,6 +4,7 @@ import (
 	"errors"
 	"gogin-api/data"
 	"gogin-api/models"
+	"os"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -245,8 +246,6 @@ func (s *ToDoListService) DeleteTodo(todoId string) error {
 
 func (s *ToDoListService) CreateUser(reqBody *models.User) (*models.User, error) {
 
-	reqBody.SecretKey = uuid.New().String()
-
 	user, err := s.db.CreateUser(reqBody)
 
 	if err != nil {
@@ -271,7 +270,7 @@ func (s *ToDoListService) Login(reqBody *models.User) (string, error) {
 	claims["role"] = user.Role
 	claims["exp"] = time.Now().Add(time.Hour * 24).Unix()
 
-	signedToken, err := token.SignedString([]byte(user.SecretKey))
+	signedToken, err := token.SignedString([]byte(os.Getenv("SECRET")))
 
 	if err != nil {
 		return "", err
