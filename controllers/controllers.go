@@ -297,7 +297,7 @@ func (c *Controller) DeleteAllLists(ctx *gin.Context) {
 			ctx.AbortWithError(http.StatusForbidden, err)
 			return
 		}
-		
+
 		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
@@ -348,4 +348,28 @@ func (c *Controller) Login(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, token)
+}
+
+func (c *Controller) DeleteUser(ctx *gin.Context) {
+
+	role := ctx.MustGet("role").(string)
+
+	err := c.service.DeleteUser(ctx.Param("username"), role)
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			ctx.JSON(http.StatusNotFound, "user not found")
+			return
+		}
+
+		if err.Error() == "action not allowed" {
+			ctx.AbortWithError(http.StatusForbidden, err)
+			return
+		}
+
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	ctx.Status(http.StatusNoContent)
 }

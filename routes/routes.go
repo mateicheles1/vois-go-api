@@ -31,12 +31,14 @@ func SetupRoutes() {
 
 	authRoute.Use(middlewares.AuthMiddleware())
 
-	r.POST("api/v2/login", controller.Login)
-	r.POST("api/v2/signup", controller.CreateUser)
+	r.POST("api/v2/users/login", controller.Login)
+	r.POST("api/v2/users/signup", controller.CreateUser)
 
 	authRoute.DELETE("lists", controller.DeleteAllLists)
 	authRoute.GET("lists", controller.GetLists)
 	authRoute.GET("lists/:listid/todos", controller.GetTodos)
+
+	authRoute.DELETE("users/:username", controller.DeleteUser)
 
 	authRoute.GET("lists/:listid", controller.GetList)
 	authRoute.POST("lists", controller.CreateList)

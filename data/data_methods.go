@@ -204,9 +204,8 @@ func (db *ToDoListDB) PatchTodo(reqBody *models.ToDo, todoId string) (*models.To
 }
 
 func (db *ToDoListDB) DeleteTodo(todoId string) error {
-	var todo models.ToDo
 
-	result := db.lists.First(&todo, "id = ?", todoId)
+	result := db.lists.Where("id = ?", todoId).Delete(&models.ToDo{})
 
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -214,10 +213,6 @@ func (db *ToDoListDB) DeleteTodo(todoId string) error {
 		}
 
 		return result.Error
-	}
-
-	if err := db.lists.Delete(&todo).Error; err != nil {
-		return err
 	}
 
 	return nil
@@ -252,16 +247,19 @@ func (db *ToDoListDB) Login(reqBody *models.User) (*models.User, error) {
 
 }
 
-func (db *ToDoListDB) FindUserByUsername(username string) (*models.User, error) {
-	var user models.User
+func (db *ToDoListDB) DeleteUser(username string) error {
 
-	err := db.lists.First(&user, "username = ?", username).Error
+	result := db.lists.Where("username = ?", username).Delete(&models.User{})
 
-	if err != nil {
-		return nil, err
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return gorm.ErrRecordNotFound
+		}
+
+		return result.Error
 	}
 
-	return &user, nil
+	return nil
 
 }
 

@@ -255,6 +255,21 @@ func (s *ToDoListService) CreateUser(reqBody *models.User) (*models.User, error)
 	return user, nil
 }
 
+func (s *ToDoListService) DeleteUser(username string, role string) error {
+
+	if role != "admin" {
+		return errors.New("action not allowed")
+	}
+
+	err := s.db.DeleteUser(username)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (s *ToDoListService) Login(reqBody *models.User) (string, error) {
 
 	user, err := s.db.Login(reqBody)

@@ -9,6 +9,7 @@ type ToDoListServiceInterface interface {
 	DeleteList(listId string) error
 	DeleteAllLists(role string) error
 	DeleteTodo(todoId string) error
+	DeleteUser(username string, role string) error
 	GetList(listId string, username string, role string) (*models.ToDoList, error)
 	GetLists(username string, role string) ([]*models.ToDoList, error)
 	GetTodo(todoId string) (*models.ToDo, error)

@@ -9,6 +9,7 @@ type ToDoListDBInterface interface {
 	DeleteList(listId string) error
 	DeleteAllLists() error
 	DeleteTodo(todoId string) error
+	DeleteUser(username string) error
 	GetAllListsAdmin() ([]*models.ToDoList, error)
 	GetList(listId string) (*models.ToDoList, error)
 	GetLists(username string) ([]*models.ToDoList, error)
