@@ -47,23 +47,28 @@ func (s *ToDoListService) GetLists(username string, role string) ([]*models.ToDo
 	return lists, nil
 }
 
-func (s *ToDoListService) GetTodos(listId string) ([]*models.ToDo, error) {
+func (s *ToDoListService) GetTodos(listId string, username string) ([]*models.ToDo, error) {
 
 	if _, err := uuid.Parse(listId); err != nil {
 		return nil, invalidUUID
 	}
 
-	todos, err := s.db.GetTodos(listId)
+	list, err := s.db.GetTodos(listId, username)
 
 	if err != nil {
 		return nil, err
 	}
 
-	for i := range todos {
-		todos[i].ListId = ""
+	if list.Owner != username {
+		return nil, errors.New("action not allowed")
 	}
 
-	return todos, nil
+	for i := range list.Todos {
+		list.Todos[i].ListId = ""
+	}
+
+	return list.Todos, nil
+
 }
 
 func (s *ToDoListService) CreateList(requestBody *models.RequestBodyList, owner string) (*models.ToDoList, error) {
@@ -104,7 +109,7 @@ func (s *ToDoListService) GetList(listId string, username string, role string) (
 		return nil, err
 	}
 
-	if username != list.Owner || role != "admin" {
+	if username != list.Owner && role != "admin" {
 		return nil, errors.New("action not allowed")
 	}
 
@@ -125,13 +130,17 @@ func (s *ToDoListService) GetList(listId string, username string, role string) (
 	return list, nil
 }
 
-func (s *ToDoListService) PatchList(reqBody *models.RequestBodyList, listId string) (*models.ToDoList, error) {
+func (s *ToDoListService) PatchList(reqBody *models.RequestBodyList, listId string, username string, role string) (*models.ToDoList, error) {
 
 	if _, err := uuid.Parse(listId); err != nil {
 		return nil, invalidUUID
 	}
 
-	list, err := s.db.PatchList(reqBody, listId)
+	list, err := s.db.PatchList(reqBody, listId, username, role)
+
+	if err != nil {
+		return nil, err
+	}
 
 	for i, v := range list.Todos {
 		list.Todos[i] = &models.ToDo{
@@ -141,20 +150,16 @@ func (s *ToDoListService) PatchList(reqBody *models.RequestBodyList, listId stri
 		}
 	}
 
-	if err != nil {
-		return nil, err
-	}
-
 	return list, nil
 }
 
-func (s *ToDoListService) DeleteList(listId string) error {
+func (s *ToDoListService) DeleteList(listId string, username string, role string) error {
 
 	if _, err := uuid.Parse(listId); err != nil {
 		return invalidUUID
 	}
 
-	err := s.db.DeleteList(listId)
+	err := s.db.DeleteList(listId, username, role)
 
 	if err != nil {
 		return err
@@ -178,13 +183,13 @@ func (s *ToDoListService) DeleteAllLists(role string) error {
 	return nil
 }
 
-func (s *ToDoListService) CreateTodo(reqBody *models.ToDo, listId string) (*models.ToDo, error) {
+func (s *ToDoListService) CreateTodo(reqBody *models.ToDo, listId string, username string) (*models.ToDo, error) {
 
 	if _, err := uuid.Parse(listId); err != nil {
 		return nil, invalidUUID
 	}
 
-	todo, err := s.db.CreateTodo(reqBody, listId)
+	todo, err := s.db.CreateTodo(reqBody, listId, username)
 
 	if err != nil {
 		return nil, err
@@ -193,13 +198,13 @@ func (s *ToDoListService) CreateTodo(reqBody *models.ToDo, listId string) (*mode
 	return todo, nil
 }
 
-func (s *ToDoListService) GetTodo(todoId string) (*models.ToDo, error) {
+func (s *ToDoListService) GetTodo(todoId string, username string) (*models.ToDo, error) {
 
 	if _, err := uuid.Parse(todoId); err != nil {
 		return nil, invalidUUID
 	}
 
-	todo, err := s.db.GetTodo(todoId)
+	todo, err := s.db.GetTodo(todoId, username)
 
 	if err != nil {
 		return nil, err
@@ -214,13 +219,13 @@ func (s *ToDoListService) GetTodo(todoId string) (*models.ToDo, error) {
 	return responseTodo, nil
 }
 
-func (s *ToDoListService) PatchTodo(reqBody *models.ToDo, todoId string) (*models.ToDo, error) {
+func (s *ToDoListService) PatchTodo(reqBody *models.ToDo, todoId string, username string) (*models.ToDo, error) {
 
 	if _, err := uuid.Parse(todoId); err != nil {
 		return nil, invalidUUID
 	}
 
-	todo, err := s.db.PatchTodo(reqBody, todoId)
+	todo, err := s.db.PatchTodo(reqBody, todoId, username)
 
 	if err != nil {
 		return nil, err
@@ -229,13 +234,13 @@ func (s *ToDoListService) PatchTodo(reqBody *models.ToDo, todoId string) (*model
 	return todo, nil
 }
 
-func (s *ToDoListService) DeleteTodo(todoId string) error {
+func (s *ToDoListService) DeleteTodo(todoId string, username string) error {
 
 	if _, err := uuid.Parse(todoId); err != nil {
 		return invalidUUID
 	}
 
-	err := s.db.DeleteTodo(todoId)
+	err := s.db.DeleteTodo(todoId, username)
 
 	if err != nil {
 		return err

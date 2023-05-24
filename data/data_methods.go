@@ -67,10 +67,10 @@ func (db *ToDoListDB) GetLists(username string) ([]*models.ToDoList, error) {
 	return lists, nil
 }
 
-func (db *ToDoListDB) GetTodos(listId string) ([]*models.ToDo, error) {
-	var todos []*models.ToDo
+func (db *ToDoListDB) GetTodos(listId string, username string) (*models.ToDoList, error) {
+	var list models.ToDoList
 
-	result := db.lists.Find(&todos, "list_id = ?", listId)
+	result := db.lists.Preload("Todos").First(&list, "id = ?", listId)
 
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -80,10 +80,10 @@ func (db *ToDoListDB) GetTodos(listId string) ([]*models.ToDo, error) {
 		return nil, result.Error
 	}
 
-	return todos, nil
+	return &list, nil
 }
 
-func (db *ToDoListDB) PatchList(reqBody *models.RequestBodyList, listId string) (*models.ToDoList, error) {
+func (db *ToDoListDB) PatchList(reqBody *models.RequestBodyList, listId string, username string, role string) (*models.ToDoList, error) {
 
 	var list models.ToDoList
 
@@ -96,6 +96,10 @@ func (db *ToDoListDB) PatchList(reqBody *models.RequestBodyList, listId string) 
 		return nil, result.Error
 	}
 
+	if list.Owner != username && role != "admin" {
+		return nil, errors.New("action not allowed")
+	}
+
 	list.Owner = reqBody.Owner
 
 	if err := db.lists.Table("to_do_lists").Where("id = ?", list.Id).Update("owner", list.Owner).Error; err != nil {
@@ -105,7 +109,7 @@ func (db *ToDoListDB) PatchList(reqBody *models.RequestBodyList, listId string) 
 	return &list, nil
 }
 
-func (db *ToDoListDB) DeleteList(listId string) error {
+func (db *ToDoListDB) DeleteList(listId string, username string, role string) error {
 
 	var list models.ToDoList
 
@@ -117,6 +121,10 @@ func (db *ToDoListDB) DeleteList(listId string) error {
 		}
 
 		return result.Error
+	}
+
+	if list.Owner != username && role != "admin" {
+		return errors.New("action not allowed")
 	}
 
 	if err := db.lists.Delete(&list).Error; err != nil {
@@ -136,9 +144,11 @@ func (db *ToDoListDB) DeleteAllLists() error {
 	return nil
 }
 
-func (db *ToDoListDB) CreateTodo(reqBody *models.ToDo, listId string) (*models.ToDo, error) {
+func (db *ToDoListDB) CreateTodo(reqBody *models.ToDo, listId string, username string) (*models.ToDo, error) {
 
-	result := db.lists.First(&models.ToDoList{}, "id = ?", listId)
+	var list models.ToDoList
+
+	result := db.lists.First(list, "id = ?", listId)
 
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -146,6 +156,10 @@ func (db *ToDoListDB) CreateTodo(reqBody *models.ToDo, listId string) (*models.T
 		}
 
 		return nil, result.Error
+	}
+
+	if list.Owner != username {
+		return nil, errors.New("action not allowed")
 	}
 
 	todo := &models.ToDo{
@@ -155,7 +169,7 @@ func (db *ToDoListDB) CreateTodo(reqBody *models.ToDo, listId string) (*models.T
 		Completed: false,
 	}
 
-	result = db.lists.Create(todo)
+	result = db.lists.Create(&todo)
 
 	if result.Error != nil {
 		return nil, result.Error
@@ -165,8 +179,9 @@ func (db *ToDoListDB) CreateTodo(reqBody *models.ToDo, listId string) (*models.T
 
 }
 
-func (db *ToDoListDB) GetTodo(todoId string) (*models.ToDo, error) {
+func (db *ToDoListDB) GetTodo(todoId string, username string) (*models.ToDo, error) {
 	var todo models.ToDo
+	var list models.ToDoList
 
 	result := db.lists.First(&todo, "id = ?", todoId)
 
@@ -178,11 +193,27 @@ func (db *ToDoListDB) GetTodo(todoId string) (*models.ToDo, error) {
 		return nil, result.Error
 	}
 
+	err := db.lists.First(&list, "id = ?", todo.ListId).Error
+
+	if err != nil {
+
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, gorm.ErrRecordNotFound
+		}
+
+		return nil, err
+	}
+
+	if list.Owner != username {
+		return nil, errors.New("action not allowed")
+	}
+
 	return &todo, nil
 }
 
-func (db *ToDoListDB) PatchTodo(reqBody *models.ToDo, todoId string) (*models.ToDo, error) {
+func (db *ToDoListDB) PatchTodo(reqBody *models.ToDo, todoId string, username string) (*models.ToDo, error) {
 	var todo models.ToDo
+	var list models.ToDoList
 
 	result := db.lists.First(&todo, "id = ?", todoId)
 
@@ -192,6 +223,20 @@ func (db *ToDoListDB) PatchTodo(reqBody *models.ToDo, todoId string) (*models.To
 		}
 
 		return nil, result.Error
+	}
+
+	err := db.lists.First(&list, "id = ?", todo.ListId).Error
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, gorm.ErrRecordNotFound
+		}
+
+		return nil, err
+	}
+
+	if list.Owner != username {
+		return nil, errors.New("action not allowed")
 	}
 
 	todo.Completed = reqBody.Completed
@@ -203,9 +248,12 @@ func (db *ToDoListDB) PatchTodo(reqBody *models.ToDo, todoId string) (*models.To
 	return &todo, nil
 }
 
-func (db *ToDoListDB) DeleteTodo(todoId string) error {
+func (db *ToDoListDB) DeleteTodo(todoId string, username string) error {
 
-	result := db.lists.Where("id = ?", todoId).Delete(&models.ToDo{})
+	var todo models.ToDo
+	var list models.ToDoList
+
+	result := db.lists.First("id = ?", todoId)
 
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -213,6 +261,26 @@ func (db *ToDoListDB) DeleteTodo(todoId string) error {
 		}
 
 		return result.Error
+	}
+
+	err := db.lists.First(&list, "id = ?", todo.ListId).Error
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return gorm.ErrRecordNotFound
+		}
+
+		return err
+	}
+
+	if list.Owner != username {
+		return errors.New("action not allowed")
+	}
+
+	todoErr := db.lists.Delete(&todo).Error
+
+	if todoErr != nil {
+		return todoErr
 	}
 
 	return nil

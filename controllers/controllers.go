@@ -40,7 +40,8 @@ func (c *Controller) GetLists(ctx *gin.Context) {
 
 func (c *Controller) GetTodos(ctx *gin.Context) {
 
-	todos, err := c.service.GetTodos(ctx.Param("listid"))
+	username := ctx.MustGet("username").(string)
+	todos, err := c.service.GetTodos(ctx.Param("listid"), username)
 
 	if err != nil {
 
@@ -51,6 +52,11 @@ func (c *Controller) GetTodos(ctx *gin.Context) {
 
 		if errors.As(err, &ErrInvalidUUID) {
 			ctx.AbortWithError(http.StatusBadRequest, err)
+			return
+		}
+
+		if err.Error() == "action not allowed" {
+			ctx.AbortWithError(http.StatusForbidden, err)
 			return
 		}
 
@@ -133,7 +139,10 @@ func (c *Controller) PatchList(ctx *gin.Context) {
 		return
 	}
 
-	list, err := c.service.PatchList(&reqBody, ctx.Param("listid"))
+	username := ctx.MustGet("username").(string)
+	role := ctx.MustGet("role").(string)
+
+	list, err := c.service.PatchList(&reqBody, ctx.Param("listid"), username, role)
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -146,6 +155,11 @@ func (c *Controller) PatchList(ctx *gin.Context) {
 			return
 		}
 
+		if err.Error() == "action not allowed" {
+			ctx.AbortWithError(http.StatusForbidden, err)
+			return
+		}
+
 		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
@@ -155,7 +169,9 @@ func (c *Controller) PatchList(ctx *gin.Context) {
 
 func (c *Controller) DeleteList(ctx *gin.Context) {
 
-	err := c.service.DeleteList(ctx.Param("listid"))
+	username, role := ctx.MustGet("username").(string), ctx.MustGet("role").(string)
+
+	err := c.service.DeleteList(ctx.Param("listid"), username, role)
 
 	if err != nil {
 
@@ -188,7 +204,9 @@ func (c *Controller) CreateTodo(ctx *gin.Context) {
 		return
 	}
 
-	todo, err := c.service.CreateTodo(&reqBody, ctx.Param("listid"))
+	username := ctx.MustGet("username").(string)
+
+	todo, err := c.service.CreateTodo(&reqBody, ctx.Param("listid"), username)
 
 	if err != nil {
 
@@ -213,7 +231,9 @@ func (c *Controller) CreateTodo(ctx *gin.Context) {
 
 func (c *Controller) GetTodo(ctx *gin.Context) {
 
-	todo, err := c.service.GetTodo(ctx.Param("todoid"))
+	username := ctx.MustGet("username").(string)
+
+	todo, err := c.service.GetTodo(ctx.Param("todoid"), username)
 
 	if err != nil {
 
@@ -224,6 +244,11 @@ func (c *Controller) GetTodo(ctx *gin.Context) {
 
 		if errors.As(err, &ErrInvalidUUID) {
 			ctx.AbortWithError(http.StatusBadRequest, err)
+			return
+		}
+
+		if err.Error() == "action not allowed" {
+			ctx.AbortWithError(http.StatusForbidden, err)
 			return
 		}
 
@@ -242,7 +267,9 @@ func (c *Controller) PatchTodo(ctx *gin.Context) {
 		return
 	}
 
-	todo, err := c.service.PatchTodo(&reqBody, ctx.Param("todoid"))
+	username := ctx.MustGet("username").(string)
+
+	todo, err := c.service.PatchTodo(&reqBody, ctx.Param("todoid"), username)
 
 	if err != nil {
 
@@ -253,6 +280,11 @@ func (c *Controller) PatchTodo(ctx *gin.Context) {
 
 		if errors.As(err, &ErrInvalidUUID) {
 			ctx.AbortWithError(http.StatusBadRequest, err)
+			return
+		}
+
+		if err.Error() == "action not allowed" {
+			ctx.AbortWithError(http.StatusForbidden, err)
 			return
 		}
 
@@ -265,9 +297,12 @@ func (c *Controller) PatchTodo(ctx *gin.Context) {
 
 func (c *Controller) DeleteTodo(ctx *gin.Context) {
 
-	err := c.service.DeleteTodo(ctx.Param("todoid"))
+	username := ctx.MustGet("username").(string)
+
+	err := c.service.DeleteTodo(ctx.Param("todoid"), username)
 
 	if err != nil {
+
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			ctx.JSON(http.StatusNotFound, "todo not found")
 			return
@@ -275,6 +310,11 @@ func (c *Controller) DeleteTodo(ctx *gin.Context) {
 
 		if errors.As(err, &ErrInvalidUUID) {
 			ctx.AbortWithError(http.StatusBadRequest, err)
+			return
+		}
+
+		if err.Error() == "action not allowed" {
+			ctx.AbortWithError(http.StatusForbidden, err)
 			return
 		}
 
@@ -338,6 +378,7 @@ func (c *Controller) Login(ctx *gin.Context) {
 	token, err := c.service.Login(&reqBody)
 
 	if err != nil {
+
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			ctx.AbortWithError(http.StatusUnauthorized, err)
 			return
