@@ -23,7 +23,6 @@ func ErrorHandler() gin.HandlerFunc {
 					Msgf("Bad request: %s", err)
 
 				ctx.JSON(http.StatusBadRequest, err.Error())
-				return
 
 			case http.StatusInternalServerError:
 				logs.ErrorLogger.Error().
@@ -33,7 +32,6 @@ func ErrorHandler() gin.HandlerFunc {
 					Msgf("Internal server error: %s", err)
 
 				ctx.JSON(http.StatusInternalServerError, "something went wrong")
-				return
 
 			case http.StatusUnauthorized:
 				logs.ErrorLogger.Error().
@@ -43,7 +41,6 @@ func ErrorHandler() gin.HandlerFunc {
 					Msgf("Unauthorized: %s", err)
 
 				ctx.JSON(http.StatusUnauthorized, "invalid credentials")
-				return
 
 			case http.StatusForbidden:
 				logs.ErrorLogger.Error().
