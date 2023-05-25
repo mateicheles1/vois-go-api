@@ -148,7 +148,7 @@ func (db *ToDoListDB) CreateTodo(reqBody *models.ToDo, listId string, username s
 
 	var list models.ToDoList
 
-	result := db.lists.First(list, "id = ?", listId)
+	result := db.lists.First(&list, "id = ?", listId)
 
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -253,7 +253,7 @@ func (db *ToDoListDB) DeleteTodo(todoId string, username string) error {
 	var todo models.ToDo
 	var list models.ToDoList
 
-	result := db.lists.First("id = ?", todoId)
+	result := db.lists.First(&todo, "id = ?", todoId)
 
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
